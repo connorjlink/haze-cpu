@@ -34,7 +34,7 @@ entity driver is
         o_Break      : out std_logic;
         o_IsBranch   : out std_logic;
         o_IPToALU    : out std_logic;
-        o_IPStride   : out std_logic;
+        o_Stride   : out std_logic;
         o_SignExtend : out std_logic
     );
 end driver;
@@ -97,7 +97,7 @@ signal s_SignExtend : std_logic := '0';
 begin
 
     -- 4-byte instructions are indicated by a 11 in the two least-significant bits of the opcode
-    o_IPStride <= '1' when s_decOpcode(1 downto 0) = 2b"11" else
+    o_Stride <= '1' when s_decOpcode(1 downto 0) = 2b"11" else
                   '0';
 
     g_DriverExtenderI: ext -- I-Format

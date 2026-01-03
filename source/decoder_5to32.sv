@@ -1,5 +1,5 @@
 // haze-cpu: decoder_5to32.sv
-// (c) 2025 Connor J. Link. All rights reserved.
+// (c) 2026 Connor J. Link. All rights reserved.
 
 module decoder_5to32
 (

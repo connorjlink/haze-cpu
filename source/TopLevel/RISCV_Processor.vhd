@@ -384,7 +384,7 @@ begin
             i_Stall      => s_IPBreak,
             i_Load       => s_BranchTaken,
             i_Addr       => s_BranchAddr,
-            i_nInc2_Inc4 => '1', -- IDEX_ID_buf.IPStride, -- NOTE: This might be 1 pipeline stage too late to increment the correct corresponding amount. But, resolving this requires instruction pre-decoding to compute length, so just assume 4-byte instructions for now
+            i_nInc2_Inc4 => '1', -- IDEX_ID_buf.Stride, -- NOTE: This might be 1 pipeline stage too late to increment the correct corresponding amount. But, resolving this requires instruction pre-decoding to compute length, so just assume 4-byte instructions for now
             o_Addr       => s_IPAddr,
             o_LinkAddr   => s_NextInstAddr 
         );
@@ -451,7 +451,7 @@ begin
             o_Break      => IDEX_ID_raw.Break,
             o_IsBranch   => IDEX_ID_raw.IsBranch,
             o_IPToALU    => IDEX_ID_raw.IPToALU,
-            o_IPStride   => IDEX_ID_raw.IPStride,
+            o_Stride   => IDEX_ID_raw.Stride,
             o_SignExtend => IDEX_ID_raw.SignExtend
         );
 

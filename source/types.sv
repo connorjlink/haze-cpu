@@ -1,5 +1,5 @@
 // haze-cpu: types.sv
-// (c) 2025 Connor J. Link. All rights reserved.
+// (c) 2026 Connor J. Link. All rights reserved.
 
 package types;
 
@@ -90,7 +90,7 @@ package types;
     logic        Break;
     int unsigned BranchMode;
     logic        IsBranch;
-    logic        IPStride;    // 0 = 2bytes, 1 = 4bytes
+    logic        Stride;    // 0 = 2bytes, 1 = 4bytes
     logic        SignExtend;  // 0 = zero-extend, 1 = sign-extend
     logic        IPToALU;
     logic [31:0] Data;

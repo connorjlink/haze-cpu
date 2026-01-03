@@ -1,5 +1,5 @@
 // haze-cpu: fulladder.sv
-// (c) 2025 Connor J. Link. All rights reserved.
+// (c) 2026 Connor J. Link. All rights reserved.
 
 module fulladder
 (

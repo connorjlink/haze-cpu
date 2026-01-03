@@ -49,7 +49,7 @@ begin
             o_Signals.Break      <= '0';
             o_Signals.BranchMode <= 0;
             o_Signals.IsBranch   <= '0';
-            o_Signals.IPStride   <= '0';
+            o_Signals.Stride   <= '0';
             o_Signals.SignExtend <= '0';
             o_Signals.IPToALU    <= '0';
             o_Signals.Data       <= (others => '0');
@@ -74,7 +74,7 @@ begin
                 o_Signals.Break      <= '0';
                 o_Signals.BranchMode <= 0;
                 o_Signals.IsBranch   <= '0';
-                o_Signals.IPStride   <= '0';
+                o_Signals.Stride   <= '0';
                 o_Signals.SignExtend <= '0';
                 o_Signals.IPToALU    <= '0';
                 o_Signals.Data       <= (others => '0');
@@ -97,7 +97,7 @@ begin
                 o_Signals.Break      <= i_Signals.Break;
                 o_Signals.BranchMode <= i_Signals.BranchMode;
                 o_Signals.IsBranch   <= i_Signals.IsBranch;
-                o_Signals.IPStride   <= i_Signals.IPStride;
+                o_Signals.Stride   <= i_Signals.Stride;
                 o_Signals.SignExtend <= i_Signals.SignExtend;
                 o_Signals.IPToALU    <= i_Signals.IPToALU;   
                 o_Signals.Data       <= i_Signals.Data;

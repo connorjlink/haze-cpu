@@ -1,22 +1,24 @@
-// haze-cpu: tb_set_less.sv
-// (c) 2025 Connor J. Link. All rights reserved.
+// haze-cpu: testbench_set_less.sv
+// (c) 2026 Connor J. Link. All rights reserved.
 
 `timescale 1ns/1ps
+`include "../source/set_less.sv"
 
-module set_less_tb;
+module testbench_set_less;
 
     // DUT I/O
     logic [31:0] i_A;
     logic [31:0] i_B;
-    logic [31:0] o_Less;
-    logic [31:0] o_LessUnsigned;
+    logic [31:0] o_IsLess;
+    logic [31:0] o_IsLessUnsigned;
 
     // Instantiate DUT
-    set_less dut (
-        .i_A(i_A),
-        .i_B(i_B),
-        .o_Less(o_Less),
-        .o_LessUnsigned(o_LessUnsigned)
+    set_less DUT
+    (
+        .i_A              (i_A),
+        .i_B              (i_B),
+        .o_IsLess         (o_IsLess),
+        .o_IsLessUnsigned (o_IsLessUnsigned)
     );
 
     // Reference model
@@ -43,26 +45,26 @@ module set_less_tb;
             exp_u = ref_less_unsigned(a, b);
 
             // Autochecking assertions
-            assert (o_Less === exp_s)
+            assert (o_IsLess === exp_s)
                 else $fatal(1,
                     "FAIL signed%s: A=0x%08h (%0d) B=0x%08h (%0d) got=0x%08h exp=0x%08h",
                     (tag == "" ? "" : {" [",tag,"]"}),
-                    a, $signed(a), b, $signed(b), o_Less, exp_s
+                    a, $signed(a), b, $signed(b), o_IsLess, exp_s
                 );
 
-            assert (o_LessUnsigned === exp_u)
+            assert (o_IsLessUnsigned === exp_u)
                 else $fatal(1,
                     "FAIL unsigned%s: A=0x%08h (%0u) B=0x%08h (%0u) got=0x%08h exp=0x%08h",
                     (tag == "" ? "" : {" [",tag,"]"}),
-                    a, a, b, b, o_LessUnsigned, exp_u
+                    a, a, b, b, o_IsLessUnsigned, exp_u
                 );
 
             // Optional: ensure outputs are canonical 0/1 in bit0 only
-            assert ((o_Less === 32'h0) || (o_Less === 32'h1))
-                else $fatal(1, "FAIL canonical signed%s: o_Less=0x%08h", (tag == "" ? "" : {" [",tag,"]"}), o_Less);
+            assert ((o_IsLess === 32'h0) || (o_IsLess === 32'h1))
+                else $fatal(1, "FAIL canonical signed%s: o_IsLess=0x%08h", (tag == "" ? "" : {" [",tag,"]"}), o_IsLess);
 
-            assert ((o_LessUnsigned === 32'h0) || (o_LessUnsigned === 32'h1))
-                else $fatal(1, "FAIL canonical unsigned%s: o_LessUnsigned=0x%08h", (tag == "" ? "" : {" [",tag,"]"}), o_LessUnsigned);
+            assert ((o_IsLessUnsigned === 32'h0) || (o_IsLessUnsigned === 32'h1))
+                else $fatal(1, "FAIL canonical unsigned%s: o_IsLessUnsigned=0x%08h", (tag == "" ? "" : {" [",tag,"]"}), o_IsLessUnsigned);
         end
     endtask
 

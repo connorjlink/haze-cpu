@@ -1,5 +1,7 @@
 // haze-cpu: fulladder_N.sv
-// (c) 2025 Connor J. Link. All rights reserved.
+// (c) 2026 Connor J. Link. All rights reserved.
+
+`include "full_adder.sv"
 
 module fulladder_N #(parameter int N = 32)
 (

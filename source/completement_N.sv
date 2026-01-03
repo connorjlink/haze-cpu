@@ -1,5 +1,5 @@
 // haze-cpu: complement_N.sv
-// (c) 2025 Connor J. Link. All rights reserved.
+// (c) 2026 Connor J. Link. All rights reserved.
 
 module complement_N #(parameter int N = 32)
 (
