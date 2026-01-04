@@ -1,6 +1,17 @@
 -------------------------------------------------------------------------
--- NOTE: PROJECT MISSING SOME CONTENT FROM ORIGINAL IP OWNERS. ALL CONTENTS CONTAINED HEREIN 
--- REFLECT MY OWN THOUGHTS, IDEAS, AND WORK. WILL NOT COMPILE AS IS.
+-- Henry Duwe
+-- Department of Electrical and Computer Engineering
+-- Iowa State University
+-------------------------------------------------------------------------
+
+-------------------------------------------------------------------------
+-- RISCV_Processor.vhd
+-- DESCRIPTION: This file contains a skeleton of a software-scheduled 
+-- pipelined RISCV_Processor implementation.
+
+-- 01.29.2019 by H3::Design created.
+-- 02.11.2025 by Connor J. Link authored RISC-V implementation.
+-- 02.16.2025 by Connor J. Link authored 5-stage pipeline upgrade.
 -------------------------------------------------------------------------
 
 library IEEE;
@@ -17,10 +28,50 @@ entity RISCV_Processor is
     port(
         iCLK      : in  std_logic;
         iRST      : in  std_logic;
+        iInstLd   : in  std_logic;
+        iInstAddr : in  std_logic_vector(N-1 downto 0);
+        iInstExt  : in  std_logic_vector(N-1 downto 0);
+        oALUOut   : out std_logic_vector(N-1 downto 0) 
     ); 
 end RISCV_Processor;
 
 architecture structure of RISCV_Processor is
+
+-- Required data memory signals
+signal s_DMemWr       : std_logic;                      -- use this signal as the final active high data memory write enable signal
+signal s_DMemAddr     : std_logic_vector(N-1 downto 0); -- use this signal as the final data memory address input
+signal s_DMemData     : std_logic_vector(N-1 downto 0); -- use this signal as the final data memory data input
+signal s_DMemOut      : std_logic_vector(N-1 downto 0); -- use this signal as the data memory output
+ 
+-- Required register file signals 
+signal s_RegWr        : std_logic;                      -- use this signal as the final active high write enable input to the register file
+signal s_RegWrAddr    : std_logic_vector(4 downto 0);   -- use this signal as the final destination register address input
+signal s_RegWrData    : std_logic_vector(N-1 downto 0); -- use this signal as the final data memory data input
+
+-- Required instruction memory signals
+signal s_IMemAddr     : std_logic_vector(N-1 downto 0); -- Do not assign this signal, assign to s_NextInstAddr instead
+signal s_NextInstAddr : std_logic_vector(N-1 downto 0); -- use this signal as your intended final instruction memory address input.
+signal s_Inst         : std_logic_vector(N-1 downto 0); -- use this signal as the instruction signal 
+
+-- Required halt signal -- for simulation
+signal s_Halt         : std_logic;  -- this signal indicates to the simulation that intended program execution has completed.
+
+-- Required overflow signal -- for overflow exception detection
+signal s_Ovfl         : std_logic;
+
+component mem is
+    generic(
+        ADDR_WIDTH : integer;
+        DATA_WIDTH : integer
+    );
+    port(
+        clk  : in  std_logic;
+        addr : in  std_logic_vector((ADDR_WIDTH-1) downto 0);
+        data : in  std_logic_vector((DATA_WIDTH-1) downto 0);
+        we   : in  std_logic := '1';
+        q    : out std_logic_vector((DATA_WIDTH -1) downto 0)
+    );
+end component;
 
 -- Signals to hold the intermediate outputs from the register file
 signal s_RS1Data : std_logic_vector(31 downto 0);
@@ -197,7 +248,7 @@ begin
     -----------------------------------------------------
 
     CPU_Insn_IR: entity work.reg_insn
-        port MAP(
+        port map(
             i_CLK     => iCLK,
             i_RST     => iRST,
             i_Stall   => s_IFID_Stall,
@@ -217,7 +268,7 @@ begin
     -----------------------------------------------------
 
     CPU_Driver_IR: entity work.reg_insn
-        port MAP(
+        port map(
             i_CLK     => iCLK,
             i_RST     => iRST,
             i_Stall   => s_IDEX_Stall,
@@ -228,7 +279,7 @@ begin
         );
 
     CPU_Driver_DR: entity work.reg_driver
-        port MAP(
+        port map(
             i_CLK     => iCLK,
             i_RST     => iRST,
             i_Stall   => s_IDEX_Stall,
@@ -249,7 +300,7 @@ begin
     -----------------------------------------------------
 
     CPU_ALU_IR: entity work.reg_insn
-        port MAP(
+        port map(
             i_CLK     => iCLK,
             i_RST     => iRST,
             i_Stall   => s_EXMEM_Stall,
@@ -260,7 +311,7 @@ begin
         );
 
     CPU_ALU_DR: entity work.reg_driver
-        port MAP(
+        port map(
             i_CLK     => iCLK,
             i_RST     => iRST,
             i_Stall   => s_EXMEM_Stall,
@@ -271,7 +322,7 @@ begin
         );
 
     CPU_ALU_AR: entity work.reg_alu
-        port MAP(
+        port map(
             i_CLK     => iCLK,
             i_RST     => iRST,
             i_Stall   => s_EXMEM_Stall,
@@ -293,7 +344,7 @@ begin
     -----------------------------------------------------
 
     CPU_Mem_IR: entity work.reg_insn
-        port MAP(
+        port map(
             i_CLK     => iCLK,
             i_RST     => iRST,
             i_Stall   => '0',
@@ -304,7 +355,7 @@ begin
         );
 
     CPU_Mem_DR: entity work.reg_driver
-        port MAP(
+        port map(
             i_CLK     => iCLK,
             i_RST     => iRST,
             i_Stall   => '0',
@@ -315,7 +366,7 @@ begin
         );
 
     CPU_Mem_AR: entity work.reg_alu
-        port MAP(
+        port map(
             i_CLK     => iCLK,
             i_RST     => iRST,
             i_Stall   => '0',
@@ -327,7 +378,7 @@ begin
     
 
     CPU_Mem_MR: entity work.reg_mem
-        port MAP(
+        port map(
             i_CLK     => iCLK,
             i_RST     => iRST,
             i_Stall   => '0',
@@ -350,7 +401,7 @@ begin
     WB_WB_raw.LSWidth <= MEMWB_ID_buf.LSWidth;
 
     CPU_WB_WR: entity work.reg_wb
-        port MAP(
+        port map(
             i_CLK     => iCLK,
             i_RST     => iRST,
             i_Stall   => '0',
@@ -375,16 +426,16 @@ begin
                     (others => '0');
 
     CPU_IP: entity work.ip
-        generic MAP(
+        generic map(
             ResetAddress => 32x"00400000"
         )
-        port MAP(
+        port map(
             i_CLK        => iCLK,
             i_RST        => iRST,
             i_Stall      => s_IPBreak,
             i_Load       => s_BranchTaken,
             i_Addr       => s_BranchAddr,
-            i_nInc2_Inc4 => '1', -- IDEX_ID_buf.Stride, -- NOTE: This might be 1 pipeline stage too late to increment the correct corresponding amount. But, resolving this requires instruction pre-decoding to compute length, so just assume 4-byte instructions for now
+            i_nInc2_Inc4 => '1', -- IDEX_ID_buf.IPStride, -- NOTE: This might be 1 pipeline stage too late to increment the correct corresponding amount. But, resolving this requires instruction pre-decoding to compute length, so just assume 4-byte instructions for now
             o_Addr       => s_IPAddr,
             o_LinkAddr   => s_NextInstAddr 
         );
@@ -415,7 +466,7 @@ begin
             IDEX_ID_buf.DS2    when others;
 
     CPU_BGU: entity work.bgu
-        port MAP(
+        port map(
             i_CLK            => iCLK,
             i_DS1            => s_BGUOperand1,
             i_DS2            => s_BGUOperand2,
@@ -432,7 +483,7 @@ begin
     -----------------------------------------------------
 
     CPU_Driver: entity work.driver
-        port MAP(
+        port map(
             i_CLK        => iCLK,
             i_RST        => iRST,
             i_Insn       => IDEX_IF_raw.Insn,    
@@ -451,7 +502,7 @@ begin
             o_Break      => IDEX_ID_raw.Break,
             o_IsBranch   => IDEX_ID_raw.IsBranch,
             o_IPToALU    => IDEX_ID_raw.IPToALU,
-            o_Stride   => IDEX_ID_raw.Stride,
+            o_IPStride   => IDEX_ID_raw.IPStride,
             o_SignExtend => IDEX_ID_raw.SignExtend
         );
 
@@ -478,7 +529,7 @@ begin
     s_RegWrAddr <= MEMWB_ID_buf.RD;
 
     CPU_RegisterFile: entity work.regfile
-        port MAP(
+        port map(
             i_CLK => nCLK,
             i_RST => iRST,
             i_RS1 => IDEX_ID_raw.RS1, -- NOTE: registers reads occur in the decode stage unless forwarding
@@ -529,7 +580,7 @@ begin
                      (others => '0');
 
     CPU_ALU: entity work.alu
-        port MAP(
+        port map(
             i_A     => s_RealALUOperand1,
             i_B     => s_RealALUOperand2,
             i_ALUOp => EXMEM_ID_raw.ALUOp,
@@ -580,7 +631,7 @@ begin
     s_MEMWB_IsLoad <= '1' when (MEMWB_ID_buf.LSWidth /= 0) else '0';
     
     CPU_HMU: entity work.hmu
-        port MAP(
+        port map(
             i_IFID_RS1       => IDEX_ID_raw.RS1,
             i_IFID_RS2       => IDEX_ID_raw.RS2,
             i_IFID_IsLoad    => s_IFID_IsLoad,
@@ -616,7 +667,7 @@ begin
         );
 
     CPU_DFU: entity work.dfu
-        port MAP(
+        port map(
             i_IFID_RS1              => IDEX_ID_raw.RS1,
             i_IFID_RS2              => IDEX_ID_raw.RS2,
             i_IFID_IsLoad           => s_IFID_IsLoad,

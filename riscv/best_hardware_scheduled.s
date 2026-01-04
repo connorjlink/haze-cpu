@@ -1,3 +1,8 @@
+###############################
+## (c) 2026 Connor J. Link. All Rights Reserved.
+## best_hardware_scheduled.s
+###############################
+
 .text
 start:
     addi t0, x0, 1

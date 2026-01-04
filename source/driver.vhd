@@ -34,7 +34,7 @@ entity driver is
         o_Break      : out std_logic;
         o_IsBranch   : out std_logic;
         o_IPToALU    : out std_logic;
-        o_Stride   : out std_logic;
+        o_IPStride   : out std_logic;
         o_SignExtend : out std_logic
     );
 end driver;
@@ -97,37 +97,37 @@ signal s_SignExtend : std_logic := '0';
 begin
 
     -- 4-byte instructions are indicated by a 11 in the two least-significant bits of the opcode
-    o_Stride <= '1' when s_decOpcode(1 downto 0) = 2b"11" else
+    o_IPStride <= '1' when s_decOpcode(1 downto 0) = 2b"11" else
                   '0';
 
     g_DriverExtenderI: ext -- I-Format
-        generic MAP(
+        generic map(
             IN_WIDTH => 12,
             OUT_WIDTH => 32
         )
-        port MAP(
+        port map(
             i_D          => s_deciImm,
             i_nZero_Sign => s_SignExtend,
             o_Q          => s_extiImm
         );
 
     g_DriverExtenderS: ext -- S-Format
-        generic MAP(
+        generic map(
             IN_WIDTH => 12,
             OUT_WIDTH => 32
         )
-        port MAP(
+        port map(
             i_D          => s_decsImm,
             i_nZero_Sign => s_SignExtend,
             o_Q          => s_extsImm
         );
 
     g_DriverExtenderB: ext -- B-Format
-        generic MAP(
+        generic map(
             IN_WIDTH => 13,
             OUT_WIDTH => 32
         )
-        port MAP(
+        port map(
             i_D          => s_decbImm,
             i_nZero_Sign => s_SignExtend,
             o_Q          => s_extbImm
@@ -138,11 +138,11 @@ begin
     s_extuImm(11 downto 0) <= 12x"0";
 
     g_DriverExtenderJ: ext -- J-Format
-        generic MAP(
+        generic map(
             IN_WIDTH => 21,
             OUT_WIDTH => 32
         )
-        port MAP(
+        port map(
             i_D          => s_decjImm,
             i_nZero_Sign => s_SignExtend,
             o_Q          => s_extjImm
@@ -154,7 +154,7 @@ begin
 
 
     g_InstructionDecoder: decoder
-        port MAP(
+        port map(
             i_CLK    => i_CLK,
             i_RST    => i_RST,
             i_Insn   => i_Insn,

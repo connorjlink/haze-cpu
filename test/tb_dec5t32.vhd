@@ -42,7 +42,7 @@ begin
 
 -- Instantiate the module under test
 DUT0: dec5t32
-	port MAP(i_S => s_iS,
+	port map(i_S => s_iS,
              o_Q => s_oQ);
 
 

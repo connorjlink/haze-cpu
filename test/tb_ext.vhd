@@ -46,7 +46,7 @@ begin
 
 -- Instantiate the module under test
 DUT0: ext
-	port MAP(i_D          => s_iD,
+	port map(i_D          => s_iD,
              i_nZero_Sign => s_inZero_Sign,
              o_Q          => s_oQ);
 

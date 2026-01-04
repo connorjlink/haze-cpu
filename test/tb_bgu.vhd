@@ -50,7 +50,7 @@ begin
 
 -- Instantiate the module under test
 DUTO: bgu
-    port MAP(
+    port map(
         i_CLK    => CLK,
         i_DS1    => s_iDS1,
         i_DS2    => s_iDS2,

@@ -1,4 +1,4 @@
-# horizon
+# Horizon
 A fully-functional five-stage hardware-scheduled pipelined, multithreaded RISC-V–based processor implemented in SystemVerilog and VHDL.
 
 ## Key Features
@@ -10,7 +10,7 @@ A fully-functional five-stage hardware-scheduled pipelined, multithreaded RISC-V
 ![hw_all_tests_passing_on_VDI](hw_all_tests_passing_on_VDI.png)
 
 ## Related Projects
- - _stratus_: My barebones custom operating system kernel design to run on the _horizon_ CPU implementation in RISC-V.
+ - _stratus_: My barebones custom operating system kernel design to run on the _Horizon_ CPU implementation in RISC-V.
    - [https://github.com/connorjlink/stratus](https://github.com/connorjlink/stratus)
- - _haze_: My custom x86 & RISC-V optimizing compiler designed to generated executables for the _horizon_ CPU in RV32-I (+ relevant extensions) machine code.
+ - _haze_: My custom x86 & RISC-V optimizing compiler designed to generated executables for the _Horizon_ CPU in RV32-I (+ relevant extensions) machine code.
    - [https://github.com/connorjlink/haze](https://github.com/connorjlink/haze)

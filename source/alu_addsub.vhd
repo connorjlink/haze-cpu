@@ -66,30 +66,30 @@ begin
 
     -- Choose between the B operand the immediate data for the second operand
     g_ImmediateSelector: mux2t1_N
-        generic MAP(N => N)
-        port MAP(i_S  => i_ALUSrc,
+        generic map(N => N)
+        port map(i_S  => i_ALUSrc,
                  i_D0 => i_B,
                  i_D1 => i_Imm,
                  o_O  => s_B);
 
     -- Invert the input
     g_BInverter: comp_N
-        generic MAP(N => N)
-        port MAP(i_A => s_B,
+        generic map(N => N)
+        port map(i_A => s_B,
                  o_F => s_Bi);
 
     -- Conditionally select input data for add/subtract
     g_AddSubSelector: mux2t1_N
-        generic MAP(N => N)
-        port MAP(i_S  => i_nAdd_Sub,
+        generic map(N => N)
+        port map(i_S  => i_nAdd_Sub,
                  i_D0 => s_B,
                  i_D1 => s_Bi,
                  o_O  => s_Bm);
 
     -- Add/subtract the input data
     g_FullAdder: adder_N
-        generic MAP(N => N)
-        port MAP(i_A  => i_A,
+        generic map(N => N)
+        port map(i_A  => i_A,
                  i_B  => s_Bm,
                  i_Ci => i_nAdd_Sub,
                  o_S  => o_S,

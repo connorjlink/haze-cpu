@@ -1,231 +1,154 @@
-// haze-cpu: testbench_instruction_pointer.sv
+// Horizon: instruction_pointer.sv
 // (c) 2026 Connor J. Link. All rights reserved.
 
 `timescale 1ns/1ps
-`include "../source/instruction_pointer.sv"
+`include "instruction_pointer.sv"
 
-module testbench_instruction_pointer;
+module instruction_pointer_tb;
 
-    time ClockPeriod = 10ns;
+    // Parameters
+    localparam logic [31:0] RESET_ADDRESS = 32'h0040_0000;
 
     // DUT I/O
-    logic        Clock = 1'b0;
-    logic        Reset = 1'b0;
+    logic        i_Clock;
+    logic        i_Reset;
+    logic        i_Load;
+    logic [31:0] i_Address;
+    logic        i_Stride; // 0: +2 bytes, 1: +4 bytes
+    logic        i_Stall;
+    logic [31:0] o_Address;
+    logic [31:0] o_LinkAddress;
 
-    logic        s_iLoad        = 1'b0;
-    logic [31:0] s_iLoadAddress = 32'h0000_0000;
-    logic        s_iStride      = 1'b0; // 0: increment 2 bytes, 1: increment 4 bytes
-    logic        s_iStall       = 1'b0;
-    logic [31:0] s_oMemoryAddress;
-    logic [31:0] s_oLinkAddress;
-
-    localparam logic [31:0] ResetAddress = 32'h0040_0000;
-
-    instruction_pointer DUT
+    // Instantiate DUT
+    instruction_pointer #(.p_ResetAddress(RESET_ADDRESS)) DUT
     (
-        .i_Clock         (Clock),
-        .i_Reset         (Reset),
-        .i_Load          (s_iLoad),
-        .i_LoadAddress   (s_iLoadAddress),
-        .i_Stride        (s_iStride),
-        .i_Stall         (s_iStall),
-        .o_MemoryAddress (s_oMemoryAddress),
-        .o_LinkAddress   (s_oLinkAddress)
+        .i_Clock       (i_Clock),
+        .i_Reset       (i_Reset),
+        .i_Load        (i_Load),
+        .i_Address     (i_Address),
+        .i_Stride      (i_Stride),
+        .i_Stall       (i_Stall),
+        .o_Address     (o_Address),
+        .o_LinkAddress (o_LinkAddress)
     );
 
-    // Clock generation
-    always begin
-        Clock = 1'b1;
-        #ClockPeriod;
-        Clock = 1'b0;
-        #ClockPeriod;
-    end
+    // Clock generation (100 MHz)
+    initial i_Clock = 0;
+    always #5 i_Clock = ~i_Clock;
 
-    // Reset sequence
+    // Reference model state
+    logic [31:0] ref_ip;
+    logic [31:0] ref_link;
+
+    // Helper: compute stride value
+    function automatic int stride_val(input logic stride_bit);
+        return stride_bit ? 4 : 2;
+    endfunction
+
+    // Helper: update reference model (matches DUT semantics)
+    task automatic update_ref;
+        int sv;
+        logic we;
+        sv = stride_val(i_Stride);
+        we = (i_Load ? 1'b1 : (i_Stall ? 1'b0 : 1'b1));
+
+        if (we) begin
+            if (i_Reset)
+                ref_ip = RESET_ADDRESS;                    // reset has priority over load in data mux
+            else if (i_Load)
+                ref_ip = i_Address;
+            else
+                ref_ip = ref_ip + sv;                 // normal increment
+        end
+        // Link is combinational from current IP and this cycle's stride
+        ref_link = ref_ip + sv;
+    endtask
+
+    // Drive, tick, check
+    task automatic tick_and_check(
+            input logic             t_reset,
+            input logic             t_load,
+            input logic [31:0] t_addr,
+            input logic             t_stride,
+            input logic             t_stall,
+            input string            tag
+    );
+        // Drive inputs before clock edge
+        i_Reset     = t_reset;
+        i_Load      = t_load;
+        i_Address   = t_addr;
+        i_Stride    = t_stride;
+        i_Stall     = t_stall;
+
+        // Tick
+        @(posedge i_Clock);
+        update_ref();
+        #1;
+
+        // Assertions
+        assert (o_Address == ref_ip)
+            else begin
+                $error("[%s] o_Address mismatch exp=%08h got=%08h", tag, ref_ip, o_Address);
+                $fatal;
+            end
+        assert (o_LinkAddress == ref_link)
+            else begin
+                $error("[%s] o_LinkAddress mismatch exp=%08h got=%08h", tag, ref_link, o_LinkAddress);
+                $fatal;
+            end
+        $display("[%0t] PASS %s IP=%08h LINK=%08h stride=%0d load=%0b stall=%0b reset=%0b",
+                         $time, tag, o_Address, o_LinkAddress, stride_val(i_Stride), i_Load, i_Stall, i_Reset);
+    endtask
+
+    // Test sequence
     initial begin
-        Reset = 1'b0;
-        #(ClockPeriod/2);
-        Reset = 1'b1;
-        #(ClockPeriod*2);
-        Reset = 1'b0;
-    end
+        // Initialize
+        i_Reset     = 0;
+        i_Load        = 0;
+        i_Address = 32'h0000_0000;
+        i_Stride    = 0;
+        i_Stall     = 0;
+        ref_ip        = 32'h0000_0000; // will be set by reset
+        ref_link    = 32'h0;
 
-    // VCD dump
-    initial begin
-        $dumpfile("instruction_pointer.vcd");
-        $dumpvars(0, testbench_instruction_pointer);
-    end
+        // Sync to clock
+        @(posedge i_Clock);
 
-    // Monitor outputs on each rising edge
-    always @(posedge Clock) begin
-        $display("[%0t] o_Addr=%08h o_LinkAddr=%08h (Load=%0b Addr=%08h Stride=%0b Stall=%0b)",
-                 $time, s_oMemoryAddress, s_oLinkAddress, s_iLoad, s_iLoadAddress, s_iStride, s_iStall);
-    end
+        // 1) Reset (no stall), stride=2
+        tick_and_check(1'b1, 1'b0, 32'h0000_0000, 1'b0, 1'b0, "reset_no_stall_stride2");
 
-    // Test cases (inputs change away from clock edges)
-    initial begin
-        // Wait for Reset deassertion and settle
-        wait (Reset == 1'b0);
-        @(negedge Clock);
-        @(negedge Clock);
+        // 2) Increment by 2 for several cycles (no stall, no load)
+        tick_and_check(1'b0, 1'b0, 32'h0000_0000, 1'b0, 1'b0, "inc2_cycle1");
+        tick_and_check(1'b0, 1'b0, 32'h0000_0000, 1'b0, 1'b0, "inc2_cycle2");
+        tick_and_check(1'b0, 1'b0, 32'h0000_0000, 1'b0, 1'b0, "inc2_cycle3");
 
-        // Test case 1: counting up by 4
-        @(negedge Clock);
-        s_iLoad        = 1'b0;
-        s_iLoadAddress = 32'h0000_0000;
-        s_iStride      = 1'b1; // +4
-        s_iStall       = 1'b0;
+        // 3) Stall for two cycles (no load), IP holds; link reflects current stride
+        tick_and_check(1'b0, 1'b0, 32'h0000_0000, 1'b0, 1'b1, "stall_hold_cycle1");
+        tick_and_check(1'b0, 1'b0, 32'h0000_0000, 1'b0, 1'b1, "stall_hold_cycle2");
 
-        // Expect: R+8, +C, +10, +14, +18 (link = mem + 4)
-        @(posedge Clock);
-        assert (s_oMemoryAddress == (ResetAddress + 32'h0000_0008)) else $fatal(1, "TC1 c1 mem exp=%08h got=%08h", ResetAddress+32'h8, s_oMemoryAddress);
-        assert (s_oLinkAddress   == (ResetAddress + 32'h0000_000C)) else $fatal(1, "TC1 c1 link exp=%08h got=%08h", ResetAddress+32'hC, s_oLinkAddress);
+        // 4) Change stride while stalled: IP holds, link updates with new stride
+        tick_and_check(1'b0, 1'b0, 32'h0000_0000, 1'b1, 1'b1, "stall_stride_change_link_updates");
 
-        @(posedge Clock);
-        assert (s_oMemoryAddress == (ResetAddress + 32'h0000_000C)) else $fatal(1, "TC1 c2 mem exp=%08h got=%08h", ResetAddress+32'hC, s_oMemoryAddress);
-        assert (s_oLinkAddress   == (ResetAddress + 32'h0000_0010)) else $fatal(1, "TC1 c2 link exp=%08h got=%08h", ResetAddress+32'h10, s_oLinkAddress);
+        // 5) Load while stalled: load overrides stall; IP loads i_Address
+        tick_and_check(1'b0, 1'b1, 32'h1000_0000, 1'b1, 1'b1, "load_overrides_stall");
+        // Stall without load after load: IP holds at loaded address; link tracks stride
+        tick_and_check(1'b0, 1'b0, 32'hDEAD_BEEF, 1'b1, 1'b1, "stall_after_load_holds");
 
-        @(posedge Clock);
-        assert (s_oMemoryAddress == (ResetAddress + 32'h0000_0010)) else $fatal(1, "TC1 c3 mem exp=%08h got=%08h", ResetAddress+32'h10, s_oMemoryAddress);
-        assert (s_oLinkAddress   == (ResetAddress + 32'h0000_0014)) else $fatal(1, "TC1 c3 link exp=%08h got=%08h", ResetAddress+32'h14, s_oLinkAddress);
+        // 6) Change stride to 4 (if not already), no stall, increment by 4
+        tick_and_check(1'b0, 1'b0, 32'h0000_0000, 1'b1, 1'b0, "inc4_cycle1");
+        tick_and_check(1'b0, 1'b0, 32'h0000_0000, 1'b1, 1'b0, "inc4_cycle2");
 
-        @(posedge Clock);
-        assert (s_oMemoryAddress == (ResetAddress + 32'h0000_0014)) else $fatal(1, "TC1 c4 mem exp=%08h got=%08h", ResetAddress+32'h14, s_oMemoryAddress);
-        assert (s_oLinkAddress   == (ResetAddress + 32'h0000_0018)) else $fatal(1, "TC1 c4 link exp=%08h got=%08h", ResetAddress+32'h18, s_oLinkAddress);
+        // 7) Reset while stalled: write disabled; IP holds; link recomputed from held IP
+        tick_and_check(1'b1, 1'b0, 32'h0000_0000, 1'b1, 1'b1, "reset_while_stalled_holds");
 
-        @(posedge Clock);
-        assert (s_oMemoryAddress == (ResetAddress + 32'h0000_0018)) else $fatal(1, "TC1 c5 mem exp=%08h got=%08h", ResetAddress+32'h18, s_oMemoryAddress);
-        assert (s_oLinkAddress   == (ResetAddress + 32'h0000_001C)) else $fatal(1, "TC1 c5 link exp=%08h got=%08h", ResetAddress+32'h1C, s_oLinkAddress);
+        // 8) Reset with load asserted: write enabled via load; reset wins in data mux
+        tick_and_check(1'b1, 1'b1, 32'h2000_0000, 1'b0, 1'b1, "reset_with_load_sets_reset_addr");
 
-        // Test case 2: counting up by 2
-        @(negedge Clock);
-        s_iLoad        = 1'b0;
-        s_iLoadAddress = 32'h0000_0000;
-        s_iStride      = 1'b0; // +2
-        s_iStall       = 1'b0;
+        // 9) Post-reset increment by 2 with no stall/load
+        tick_and_check(1'b0, 1'b0, 32'h0000_0000, 1'b0, 1'b0, "post_reset_inc2_cycle1");
+        tick_and_check(1'b0, 1'b0, 32'h0000_0000, 1'b0, 1'b0, "post_reset_inc2_cycle2");
 
-        // Expect: R+1A, +1C, +1E, +20, +22 (link = mem + 2)
-        @(posedge Clock);
-        assert (s_oMemoryAddress == (ResetAddress + 32'h0000_001A)) else $fatal(1, "TC2 c1 mem exp=%08h got=%08h", ResetAddress+32'h1A, s_oMemoryAddress);
-        assert (s_oLinkAddress   == (ResetAddress + 32'h0000_001C)) else $fatal(1, "TC2 c1 link exp=%08h got=%08h", ResetAddress+32'h1C, s_oLinkAddress);
-
-        @(posedge Clock);
-        assert (s_oMemoryAddress == (ResetAddress + 32'h0000_001C)) else $fatal(1, "TC2 c2 mem exp=%08h got=%08h", ResetAddress+32'h1C, s_oMemoryAddress);
-        assert (s_oLinkAddress   == (ResetAddress + 32'h0000_001E)) else $fatal(1, "TC2 c2 link exp=%08h got=%08h", ResetAddress+32'h1E, s_oLinkAddress);
-
-        @(posedge Clock);
-        assert (s_oMemoryAddress == (ResetAddress + 32'h0000_001E)) else $fatal(1, "TC2 c3 mem exp=%08h got=%08h", ResetAddress+32'h1E, s_oMemoryAddress);
-        assert (s_oLinkAddress   == (ResetAddress + 32'h0000_0020)) else $fatal(1, "TC2 c3 link exp=%08h got=%08h", ResetAddress+32'h20, s_oLinkAddress);
-
-        @(posedge Clock);
-        assert (s_oMemoryAddress == (ResetAddress + 32'h0000_0020)) else $fatal(1, "TC2 c4 mem exp=%08h got=%08h", ResetAddress+32'h20, s_oMemoryAddress);
-        assert (s_oLinkAddress   == (ResetAddress + 32'h0000_0022)) else $fatal(1, "TC2 c4 link exp=%08h got=%08h", ResetAddress+32'h22, s_oLinkAddress);
-
-        @(posedge Clock);
-        assert (s_oMemoryAddress == (ResetAddress + 32'h0000_0022)) else $fatal(1, "TC2 c5 mem exp=%08h got=%08h", ResetAddress+32'h22, s_oMemoryAddress);
-        assert (s_oLinkAddress   == (ResetAddress + 32'h0000_0024)) else $fatal(1, "TC2 c5 link exp=%08h got=%08h", ResetAddress+32'h24, s_oLinkAddress);
-
-        // Test case 3: stall counting for both counting modes
-        @(negedge Clock);
-        s_iLoad        = 1'b0;
-        s_iLoadAddress = 32'h0000_0000;
-        s_iStride      = 1'b1; // stride=4 but stalled
-        s_iStall       = 1'b1;
-
-        // Expect: mem holds R+22, link = mem + 4 (3 cycles)
-        repeat (1) @(posedge Clock); // c1
-        assert (s_oMemoryAddress == (ResetAddress + 32'h0000_0022)) else $fatal(1, "TC3 c1 mem");
-        assert (s_oLinkAddress   == (ResetAddress + 32'h0000_0026)) else $fatal(1, "TC3 c1 link");
-
-        repeat (1) @(posedge Clock); // c2
-        assert (s_oMemoryAddress == (ResetAddress + 32'h0000_0022)) else $fatal(1, "TC3 c2 mem");
-        assert (s_oLinkAddress   == (ResetAddress + 32'h0000_0026)) else $fatal(1, "TC3 c2 link");
-
-        repeat (1) @(posedge Clock); // c3
-        assert (s_oMemoryAddress == (ResetAddress + 32'h0000_0022)) else $fatal(1, "TC3 c3 mem");
-        assert (s_oLinkAddress   == (ResetAddress + 32'h0000_0026)) else $fatal(1, "TC3 c3 link");
-
-        // Change stride to 2 while still stalled; mem holds, link updates
-        @(negedge Clock);
-        s_iStride = 1'b0;
-
-        // Expect: mem holds R+22, link = mem + 2 (3 cycles)
-        repeat (1) @(posedge Clock); // c4
-        assert (s_oMemoryAddress == (ResetAddress + 32'h0000_0022)) else $fatal(1, "TC3 c4 mem");
-        assert (s_oLinkAddress   == (ResetAddress + 32'h0000_0024)) else $fatal(1, "TC3 c4 link");
-
-        repeat (1) @(posedge Clock); // c5
-        assert (s_oMemoryAddress == (ResetAddress + 32'h0000_0022)) else $fatal(1, "TC3 c5 mem");
-        assert (s_oLinkAddress   == (ResetAddress + 32'h0000_0024)) else $fatal(1, "TC3 c5 link");
-
-        repeat (1) @(posedge Clock); // c6
-        assert (s_oMemoryAddress == (ResetAddress + 32'h0000_0022)) else $fatal(1, "TC3 c6 mem");
-        assert (s_oLinkAddress   == (ResetAddress + 32'h0000_0024)) else $fatal(1, "TC3 c6 link");
-
-        // Test case 4: loading a custom address
-        @(negedge Clock);
-        s_iLoad        = 1'b1;
-        s_iLoadAddress = 32'hFEED_FACE;
-        s_iStride      = 1'b0; // +2
-        s_iStall       = 1'b0;
-
-        // Load cycle
-        @(posedge Clock);
-        assert (s_oMemoryAddress == 32'hFEED_FACE) else $fatal(1, "TC4 load mem");
-        assert (s_oLinkAddress   == 32'hFEED_FAD0) else $fatal(1, "TC4 load link");
-
-        @(negedge Clock);
-        s_iLoad        = 1'b0;
-
-        // Then +2 for four cycles: FACE+2, +4, +6, +8
-        @(posedge Clock);
-        assert (s_oMemoryAddress == 32'hFEED_FAD0) else $fatal(1, "TC4 c1 mem");
-        assert (s_oLinkAddress   == 32'hFEED_FAD2) else $fatal(1, "TC4 c1 link");
-
-        @(posedge Clock);
-        assert (s_oMemoryAddress == 32'hFEED_FAD2) else $fatal(1, "TC4 c2 mem");
-        assert (s_oLinkAddress   == 32'hFEED_FAD4) else $fatal(1, "TC4 c2 link");
-
-        @(posedge Clock);
-        assert (s_oMemoryAddress == 32'hFEED_FAD4) else $fatal(1, "TC4 c3 mem");
-        assert (s_oLinkAddress   == 32'hFEED_FAD6) else $fatal(1, "TC4 c3 link");
-
-        @(posedge Clock);
-        assert (s_oMemoryAddress == 32'hFEED_FAD6) else $fatal(1, "TC4 c4 mem");
-        assert (s_oLinkAddress   == 32'hFEED_FAD8) else $fatal(1, "TC4 c4 link");
-
-        // Test case 5: loading zero address then count
-        @(negedge Clock);
-        s_iLoad        = 1'b1;
-        s_iLoadAddress = 32'h0000_0000;
-        s_iStride      = 1'b0;
-        s_iStall       = 1'b0;
-
-        // Load cycle
-        @(posedge Clock);
-        assert (s_oMemoryAddress == 32'h0000_0000) else $fatal(1, "TC5 load mem");
-        assert (s_oLinkAddress   == 32'h0000_0002) else $fatal(1, "TC5 load link");
-
-        @(negedge Clock);
-        s_iLoad        = 1'b0;
-
-        // Then +2 for four cycles: 2, 4, 6, 8
-        @(posedge Clock);
-        assert (s_oMemoryAddress == 32'h0000_0002) else $fatal(1, "TC5 c1 mem");
-        assert (s_oLinkAddress   == 32'h0000_0004) else $fatal(1, "TC5 c1 link");
-
-        @(posedge Clock);
-        assert (s_oMemoryAddress == 32'h0000_0004) else $fatal(1, "TC5 c2 mem");
-        assert (s_oLinkAddress   == 32'h0000_0006) else $fatal(1, "TC5 c2 link");
-
-        @(posedge Clock);
-        assert (s_oMemoryAddress == 32'h0000_0006) else $fatal(1, "TC5 c3 mem");
-        assert (s_oLinkAddress   == 32'h0000_0008) else $fatal(1, "TC5 c3 link");
-
-        @(posedge Clock);
-        assert (s_oMemoryAddress == 32'h0000_0008) else $fatal(1, "TC5 c4 mem");
-        assert (s_oLinkAddress   == 32'h0000_000A) else $fatal(1, "TC5 c4 link");
-
+        $display("ALL TESTS PASSED");
         $finish;
     end
 

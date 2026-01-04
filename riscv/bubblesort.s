@@ -1,10 +1,6 @@
 ###############################
 ## (c) 2026 Connor J. Link. All Rights Reserved.
-## Proj1_bubblesort.s
-###############################
-
-###############################
-## Bubble Sort Test Program
+## bubblesort.s
 ###############################
 
 # t3 is the success/failure flag

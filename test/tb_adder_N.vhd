@@ -49,8 +49,8 @@ begin
 
 -- Instantiate the module under test
 DUT0: adder_N
-    generic MAP(N => DATA_WIDTH)
-	port MAP(i_A  => s_iA,
+    generic map(N => DATA_WIDTH)
+	port map(i_A  => s_iA,
  		     i_B  => s_iB,
 		     i_Ci => s_iCi,
 		     o_S  => s_oS,

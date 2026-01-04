@@ -1,10 +1,7 @@
 ###############################
-## (c) 2026 Connor J. Link. All Rights Reserved.
-## Proj2_base_test.s
-###############################
-
-###############################
-## Arithmetic-Type Instruction Test Suite
+## (c) 2025 Connor J. Link. All Rights Reserved.
+## Iowa State University - CPRE 3810
+## base.s
 ###############################
 
 # x2 contains the test number to diagnose failures easily

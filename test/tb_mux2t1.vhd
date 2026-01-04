@@ -46,7 +46,7 @@ begin
 
 -- Instantiate the module under test
 DUT0: mux2t1
-	port MAP(i_D0 => s_iD0,
+	port map(i_D0 => s_iD0,
  		 i_D1 => s_iD1,
 		 i_S  => s_iS,
 		 o_O  => s_oO);

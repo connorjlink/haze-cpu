@@ -79,7 +79,7 @@ begin
 
 -- Instantiate the module under test
 DUTO: driver
-    port MAP(
+    port map(
         i_CLK        => CLK,
         i_RST        => reset,
         i_Insn       => s_iInsn,

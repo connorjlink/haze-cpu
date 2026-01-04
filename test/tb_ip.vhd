@@ -58,7 +58,7 @@ begin
 
 -- Instantiate the module under test
 DUTO: ip
-    port MAP(
+    port map(
         i_CLK        => CLK,
         i_RST        => reset,
         i_Load       => s_iLoad,

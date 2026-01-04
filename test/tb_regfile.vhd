@@ -55,7 +55,7 @@ begin
 
 -- Instantiate the module under test
 DUT0: regfile
-	port MAP(i_CLK => CLK,
+	port map(i_CLK => CLK,
              i_RST => reset,
              i_RS1 => s_iRS1,
              i_RS2 => s_iRS2,

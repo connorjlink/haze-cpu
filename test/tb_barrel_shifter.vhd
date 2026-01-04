@@ -50,7 +50,7 @@ begin
 
 -- Instantiate the module under test
 DUT0: barrel_shifter
-    port MAP(
+    port map(
         i_A                   => s_iA,
         i_B                   => s_iB(4 downto 0),
         i_NLogical_Arithmetic => s_iNLogical_Arithmetic,

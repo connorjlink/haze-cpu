@@ -45,7 +45,7 @@ begin
 
 -- Instantiate the module under test
 DUT0: mux32t1
-	port MAP(i_S => s_iS,
+	port map(i_S => s_iS,
              i_D => s_iD,
              o_Q => s_oQ);
 

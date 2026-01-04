@@ -1,10 +1,12 @@
-// haze-cpu: testbench_set_less.sv
+// Horizon: testbench_comparator.sv
 // (c) 2026 Connor J. Link. All rights reserved.
 
 `timescale 1ns/1ps
-`include "../source/set_less.sv"
+`include "comparator.sv"
 
-module testbench_set_less;
+`define N 20000
+
+module testbench_comparator;
 
     // DUT I/O
     logic [31:0] i_A;
@@ -13,7 +15,7 @@ module testbench_set_less;
     logic [31:0] o_IsLessUnsigned;
 
     // Instantiate DUT
-    set_less DUT
+    comparator DUT
     (
         .i_A              (i_A),
         .i_B              (i_B),
@@ -34,6 +36,7 @@ module testbench_set_less;
     task automatic apply_and_check(input logic [31:0] a, input logic [31:0] b, input string tag = "");
         logic [31:0] exp_s;
         logic [31:0] exp_u;
+        string tag_suffix;
         begin
             i_A = a;
             i_B = b;
@@ -44,27 +47,30 @@ module testbench_set_less;
             exp_s = ref_less_signed(a, b);
             exp_u = ref_less_unsigned(a, b);
 
+            // Build optional tag suffix as a proper string
+            tag_suffix = (tag == "") ? "" : $sformatf(" [%s]", tag);
+
             // Autochecking assertions
             assert (o_IsLess === exp_s)
                 else $fatal(1,
                     "FAIL signed%s: A=0x%08h (%0d) B=0x%08h (%0d) got=0x%08h exp=0x%08h",
-                    (tag == "" ? "" : {" [",tag,"]"}),
+                    tag_suffix,
                     a, $signed(a), b, $signed(b), o_IsLess, exp_s
                 );
 
             assert (o_IsLessUnsigned === exp_u)
                 else $fatal(1,
                     "FAIL unsigned%s: A=0x%08h (%0u) B=0x%08h (%0u) got=0x%08h exp=0x%08h",
-                    (tag == "" ? "" : {" [",tag,"]"}),
+                    tag_suffix,
                     a, a, b, b, o_IsLessUnsigned, exp_u
                 );
 
             // Optional: ensure outputs are canonical 0/1 in bit0 only
             assert ((o_IsLess === 32'h0) || (o_IsLess === 32'h1))
-                else $fatal(1, "FAIL canonical signed%s: o_IsLess=0x%08h", (tag == "" ? "" : {" [",tag,"]"}), o_IsLess);
+                else $fatal(1, "FAIL canonical signed%s: o_IsLess=0x%08h", tag_suffix, o_IsLess);
 
             assert ((o_IsLessUnsigned === 32'h0) || (o_IsLessUnsigned === 32'h1))
-                else $fatal(1, "FAIL canonical unsigned%s: o_IsLessUnsigned=0x%08h", (tag == "" ? "" : {" [",tag,"]"}), o_IsLessUnsigned);
+                else $fatal(1, "FAIL canonical unsigned%s: o_IsLessUnsigned=0x%08h", tag_suffix, o_IsLessUnsigned);
         end
     endtask
 
@@ -106,14 +112,15 @@ module testbench_set_less;
         apply_and_check(32'hFFFF_FFFF, 32'h0000_0000, "umax_vs_u0");
 
         // Random tests
-        int unsigned N = 20000;
-        for (int unsigned k = 0; k < N; k++) begin
-            logic [31:0] a = rand32();
-            logic [31:0] b = rand32();
+        for (int unsigned k = 0; k < `N; k++) begin
+            logic [31:0] a;
+            logic [31:0] b;
+            a = rand32();
+            b = rand32();
             apply_and_check(a, b, $sformatf("rand_%0d", k));
         end
 
-        $display("PASS: set_less_tb completed (%0d random + directed).", N);
+        $display("PASS: testbench_comparator completed (%0d random + directed).", `N);
         $finish;
     end
 

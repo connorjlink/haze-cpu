@@ -50,9 +50,9 @@ begin
 
 -- Instantiate the module under test
 dmem: mem
-    generic MAP(DATA_WIDTH => DATA_WIDTH,
+    generic map(DATA_WIDTH => DATA_WIDTH,
                 ADDR_WIDTH => ADDR_WIDTH)
-	port MAP(clk  => CLK,
+	port map(clk  => CLK,
              addr => s_iA,
              data => s_iD,
              we   => s_iWE,

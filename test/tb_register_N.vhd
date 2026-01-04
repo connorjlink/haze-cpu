@@ -47,8 +47,8 @@ begin
 
 -- Instantiate the module under test
 DUT0: register_N
-    generic MAP(N => DATA_WIDTH)
-	port MAP(i_CLK => CLK,
+    generic map(N => DATA_WIDTH)
+	port map(i_CLK => CLK,
              i_RST => reset,
              i_WE  => s_iWE,
              i_D   => s_iD,

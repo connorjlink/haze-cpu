@@ -14,6 +14,24 @@ use IEEE.numeric_std.all;
 library work;
 use work.RISCV_types.all;
 
+entity set_less is
+    port(i_A     : in  std_logic_vector(31 downto 0);
+         i_B     : in  std_logic_vector(31 downto 0);
+         o_Less  : out std_logic_vector(31 downto 0);
+         o_LessU : out std_logic_vector(31 downto 0));
+end set_less;
+
+architecture implementation of set_less is
+begin
+
+    o_LessU <= 32x"1" when (unsigned(i_A) < unsigned(i_B)) else
+               32x"0";
+        
+    o_Less <= 32x"1" when (signed(i_A) < signed(i_B)) else
+              32x"0";
+
+end implementation;
+
 entity alu is
     generic(
         -- Data width in bits
@@ -121,7 +139,7 @@ begin
     g_NBit_XOR: for i in 0 to N-1
     generate
         XORI: xorg2
-            port MAP(
+            port map(
                 i_A => i_A(i),
                 i_B => i_B(i),
                 o_F => s_xorF(i)
@@ -132,7 +150,7 @@ begin
     g_NBit_OR: for i in 0 to N-1
     generate
         ORI: org2
-            port MAP(
+            port map(
                 i_A => i_A(i),
                 i_B => i_B(i),
                 o_F => s_orF(i)
@@ -143,7 +161,7 @@ begin
     g_NBit_AND: for i in 0 to N-1
     generate
         ANDI: andg2
-            port MAP(
+            port map(
                 i_A => i_A(i),
                 i_B => i_B(i),
                 o_F => s_andF(i)
@@ -152,7 +170,7 @@ begin
 
     -- Adder Unit
     g_NBit_ALUAdder: addsub_N
-        port MAP(
+        port map(
             i_A        => i_A,
             i_B        => i_B,
             i_nAdd_Sub => '0',
@@ -162,7 +180,7 @@ begin
 
     -- Subtractor Unit
     g_NBitALUSubtractor: addsub_N
-        port MAP(
+        port map(
             i_A        => i_A,
             i_B        => i_B,
             i_nAdd_Sub => '1',
@@ -175,7 +193,7 @@ begin
     
     -- Left Shift Unit
     g_BarrelShifterLeft: barrel_shifter
-        port MAP(
+        port map(
             i_A  => i_A,
             i_B  => i_B(4 downto 0), -- log2(32) = 5
             i_NLogical_Arithmetic => '0', -- Logical shift
@@ -185,7 +203,7 @@ begin
 
     -- Right Shift Unit
     g_BarrelShifterRightLogical: barrel_shifter
-        port MAP(
+        port map(
             i_A  => i_A,
             i_B  => i_B(4 downto 0), -- log2(32) = 5
             i_NLogical_Arithmetic => '0', -- Logical shift
@@ -193,7 +211,7 @@ begin
             o_S  => s_srlF
         );
     g_BarrelShifterRightArithmetic: barrel_shifter
-        port MAP(
+        port map(
             i_A  => i_A,
             i_B  => i_B(4 downto 0), -- log2(32) = 5
             i_NLogical_Arithmetic => '1', -- Arithmetic shift
@@ -203,7 +221,7 @@ begin
 
     -- Set-less-than Unit
     g_SetLessThan: set_less 
-        port MAP(
+        port map(
             i_A => i_A,
             i_B => i_B,
             o_Less => s_sltF,
@@ -212,7 +230,7 @@ begin
 
     -- Main output multiplexors 
     g_ALU_OutputMux: alu_mux
-        port MAP(
+        port map(
             i_addF  => s_addF,
             i_subF  => s_subF,
             i_andF  => s_andF,

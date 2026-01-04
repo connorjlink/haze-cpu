@@ -53,8 +53,8 @@ begin
 
 -- Instantiate the module under test
 DUT0: alu_addsub
-    generic MAP(N => DATA_WIDTH)
-	port MAP(i_A        => s_iA,
+    generic map(N => DATA_WIDTH)
+	port map(i_A        => s_iA,
  		     i_B        => s_iB,
  		     i_Imm      => s_iImm,
  		     i_ALUSrc   => s_iALUSrc,

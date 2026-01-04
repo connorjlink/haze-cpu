@@ -1,10 +1,6 @@
 ###############################
 ## (c) 2026 Connor J. Link. All Rights Reserved.
-## Proj1_cf_test.s
-###############################
-
-###############################
-## Control Flow Instructions Test Suite
+## control_flow.s
 ###############################
 
 # t3 contains whether or not the program was successful

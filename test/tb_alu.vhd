@@ -55,10 +55,10 @@ begin
 
 -- Instantiate the module under test
 DUTO: alu
-    generic MAP(
+    generic map(
         N => 32
     )
-    port MAP(
+    port map(
         i_A     => s_iA,
         i_B     => s_iB,
         i_ALUOp => s_iALUOp,
