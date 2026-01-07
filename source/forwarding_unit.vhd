@@ -6,7 +6,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 library work;
-use work.RISCV_types.all;
+use work.types.all;
 
 entity forwarding_unit is
     port(
@@ -71,24 +71,24 @@ begin
 
             -- Detect ALU operand dependence upon arithmetic result
             if i_EXMEM_RegWrite = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS1 then
-                v_ForwardALUOperand1 := work.RISCV_types.FROM_EX;
+                v_ForwardALUOperand1 := work.types.FROM_EX;
             
             -- Detect ALU operand dependence upon memory access or MEM-stage operand
             elsif i_MEMWB_RegWrite = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS1 and not 
                  (i_EXMEM_RegWrite = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS1) then
-                v_ForwardALUOperand1 := work.RISCV_types.FROM_MEM;
+                v_ForwardALUOperand1 := work.types.FROM_MEM;
 
             end if;
 
             
             -- Detect ALU operand dependence upon arithmetic result
-            if i_EXMEM_RegWrite = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS2 and i_IDEX_ALUSrc = work.RISCV_types.ALUSRC_REG then
-                v_ForwardALUOperand2 := work.RISCV_types.FROM_EX;
+            if i_EXMEM_RegWrite = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS2 and i_IDEX_ALUSrc = work.types.ALUSRC_REG then
+                v_ForwardALUOperand2 := work.types.FROM_EX;
 
             -- Detect ALU operand dependence upon memory access or MEM-stage operand
             elsif i_MEMWB_RegWrite = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS2 and not
-                 (i_EXMEM_RegWrite = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS2) and i_EXMEM_IsLoad = '0' and i_IDEX_IsLoad = '0' and i_IDEX_ALUSrc = work.RISCV_types.ALUSRC_REG then
-                v_ForwardALUOperand2 := work.RISCV_types.FROM_MEM;
+                 (i_EXMEM_RegWrite = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS2) and i_EXMEM_IsLoad = '0' and i_IDEX_IsLoad = '0' and i_IDEX_ALUSrc = work.types.ALUSRC_REG then
+                v_ForwardALUOperand2 := work.types.FROM_MEM;
 
             end if;
 
@@ -97,25 +97,25 @@ begin
             if i_MEMWB_RegWrite = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS2 then
                 -- When the earlier instruction loads data needed later for store
                 if i_MEMWB_IsLoad = '1' and i_IDEX_MemWrite = '1' then
-                    v_ForwardMemData := work.RISCV_types.FROM_MEM;
+                    v_ForwardMemData := work.types.FROM_MEM;
 
                 -- When the earlier instruction writes data needed later for store
                 elsif i_IDEX_IsLoad = '1' and i_IDEX_MemWrite = '1' then
-                    v_ForwardMemData := work.RISCV_types.FROM_MEMWB_ALU;
+                    v_ForwardMemData := work.types.FROM_MEMWB_ALU;
 
                 end if;
                 
             -- Detect memory write data dependence upon arithmetic result
             elsif i_EXMEM_RegWrite = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS2 and i_IDEX_IsLoad = '1' and i_EXMEM_IsLoad = '0' then
-                v_ForwardMemData := work.RISCV_types.FROM_EXMEM_ALU;
+                v_ForwardMemData := work.types.FROM_EXMEM_ALU;
 
             -- Detect memory write data dependence upon retiring memory read
             elsif i_MEMWB_RegWrite = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS2 and i_MEMWB_IsLoad = '1' then
-                v_ForwardMemData := work.RISCV_types.FROM_MEM;
+                v_ForwardMemData := work.types.FROM_MEM;
             
             -- Detect memory write data dependence upon retiring arithmetic result
             elsif i_MEMWB_RegWrite = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS2 and i_IDEX_IsLoad = '1' and i_MEMWB_IsLoad = '0' then
-                v_ForwardMemData := work.RISCV_types.FROM_MEMWB_ALU;
+                v_ForwardMemData := work.types.FROM_MEMWB_ALU;
 
             end if;
 
@@ -124,21 +124,21 @@ begin
             if i_MEMWB_RegWrite = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS1 then
                 -- When the earlier instruction is load/store
                 if i_IDEX_IsLoad = '0' and i_MEMWB_IsLoad = '1' then
-                    v_ForwardALUOperand1 := work.RISCV_types.FROM_MEM;
+                    v_ForwardALUOperand1 := work.types.FROM_MEM;
 
                 -- When the later instruction is a load/store
                 elsif i_IDEX_IsLoad = '1' and i_MEMWB_IsLoad = '0' then
-                    v_ForwardALUOperand1 := work.RISCV_types.FROM_MEMWB_ALU;
+                    v_ForwardALUOperand1 := work.types.FROM_MEMWB_ALU;
 
                 -- When both instructions are load/store
                 elsif i_IDEX_IsLoad = '1' and i_MEMWB_IsLoad = '1' then
-                    v_ForwardALUOperand1 := work.RISCV_types.FROM_MEM;
+                    v_ForwardALUOperand1 := work.types.FROM_MEM;
 
                 end if;
 
             -- Detect address computation dependence upon retiring arithmetic result
             elsif i_MEMWB_RegWrite = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS1 and i_IDEX_IsLoad = '1' then
-                v_ForwardALUOperand2 := work.RISCV_types.FROM_MEMWB_ALU;
+                v_ForwardALUOperand2 := work.types.FROM_MEMWB_ALU;
 
             end if;
 
@@ -152,17 +152,17 @@ begin
 
             -- Detect branch comparison operator dependence upon arithmetic result
             if i_EXMEM_RegWrite = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS1 then
-                v_ForwardBGUOperand1 := work.RISCV_types.FROM_EXMEM_ALU;
+                v_ForwardBGUOperand1 := work.types.FROM_EXMEM_ALU;
 
             elsif i_MEMWB_RegWrite = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS1 then
                 
                 -- Detect branch comparison operator dependence upon memory access
                 if i_MEMWB_IsLoad = '1' then
-                    v_ForwardBGUOperand1 := work.RISCV_types.FROM_MEM; 
+                    v_ForwardBGUOperand1 := work.types.FROM_MEM; 
 
                 -- Detect branch comparison operator dependence upon retiring arithmetic result
                 else 
-                    v_ForwardBGUOperand1 := work.RISCV_types.FROM_MEMWB_ALU;
+                    v_ForwardBGUOperand1 := work.types.FROM_MEMWB_ALU;
 
                 end if;
 
@@ -171,17 +171,17 @@ begin
 
             -- Detect branch comparison operator dependence upon arithmetic result
             if i_EXMEM_RegWrite = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS2 then
-                v_ForwardBGUOperand2 := work.RISCV_types.FROM_EXMEM_ALU;
+                v_ForwardBGUOperand2 := work.types.FROM_EXMEM_ALU;
 
             elsif i_MEMWB_RegWrite = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS2 then
                 
                 -- Detect branch comparison operator dependence upon memory access
                 if i_MEMWB_IsLoad = '1' then
-                    v_ForwardBGUOperand2 := work.RISCV_types.FROM_MEM;
+                    v_ForwardBGUOperand2 := work.types.FROM_MEM;
                     
                 -- Detect branch comparison operator dependence upon retiring arithmetic result
                 else
-                    v_ForwardBGUOperand2 := work.RISCV_types.FROM_MEMWB_ALU;
+                    v_ForwardBGUOperand2 := work.types.FROM_MEMWB_ALU;
 
                 end if;
 

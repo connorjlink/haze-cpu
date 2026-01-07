@@ -50,7 +50,7 @@ DUTO: entity work.decoder
     port map(
         i_Clock    => CLK,
         i_Reset    => reset,
-        i_Insn   => s_iInsn,
+        i_Instruction   => s_iInsn,
         o_Opcode => s_oOpcode,
         o_RD     => s_oRD,
         o_RS1    => s_oRS1,

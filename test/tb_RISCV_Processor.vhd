@@ -14,7 +14,7 @@ use IEEE.std_logic_textio.all;  -- For logic types I/O
 library std;
 use std.env.all;                -- For hierarchical/external signals
 use std.textio.all;             -- For basic I/O
-use work.RISCV_types.all;
+use work.types.all;
 
 entity tb_RISCV_Processor is
 	generic(gCLK_HPER  : time := 10 ns;
@@ -25,7 +25,7 @@ architecture mixed of tb_RISCV_Processor is
 
 component RISCV_Processor is
 	generic(
-		N : integer := work.RISCV_types.DATA_WIDTH
+		N : integer := work.types.DATA_WIDTH
 	);
 	port(
 		i_Clock      : in  std_logic;

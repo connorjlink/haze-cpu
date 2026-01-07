@@ -11,7 +11,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
-use work.RISCV_types.all;
+use work.types.all;
 
 entity reg_driver is
     port(
@@ -20,8 +20,8 @@ entity reg_driver is
         i_Stall    : in  std_logic;
         i_Flush    : in  std_logic;
 
-        i_Signals  : in  work.RISCV_types.driver_record_t;
-        o_Signals  : out work.RISCV_types.driver_record_t
+        i_Signals  : in  work.types.driver_record_t;
+        o_Signals  : out work.types.driver_record_t
     );
 end reg_driver;
 
@@ -36,10 +36,10 @@ begin
             o_Signals.MemWrite   <= '0';
             o_Signals.RegWrite   <= '0';
             o_Signals.RFSrc      <= 0;
-            o_Signals.ALUSrc     <= work.RISCV_types.ALUSRC_REG;
+            o_Signals.ALUSrc     <= work.types.ALUSRC_REG;
             o_Signals.ALUOp      <= 0;
             o_Signals.BGUOp      <= 0;
-            o_Signals.LSWidth    <= 0;
+            o_Signals.MemoryWidth <= 0;
             o_Signals.RD         <= (others => '0');
             o_Signals.RS1        <= (others => '0');
             o_Signals.RS2        <= (others => '0');
@@ -61,10 +61,10 @@ begin
                 o_Signals.MemWrite   <= '0';
                 o_Signals.RegWrite   <= '0';
                 o_Signals.RFSrc      <= 0;
-                o_Signals.ALUSrc     <= work.RISCV_types.ALUSRC_REG;
+                o_Signals.ALUSrc     <= work.types.ALUSRC_REG;
                 o_Signals.ALUOp      <= 0;
                 o_Signals.BGUOp      <= 0;
-                o_Signals.LSWidth    <= 0;
+                o_Signals.MemoryWidth    <= 0;
                 o_Signals.RD         <= (others => '0');
                 o_Signals.RS1        <= (others => '0');
                 o_Signals.RS2        <= (others => '0');
@@ -87,7 +87,7 @@ begin
                 o_Signals.ALUSrc     <= i_Signals.ALUSrc;    
                 o_Signals.ALUOp      <= i_Signals.ALUOp;     
                 o_Signals.BGUOp      <= i_Signals.BGUOp;     
-                o_Signals.LSWidth    <= i_Signals.LSWidth;   
+                o_Signals.MemoryWidth    <= i_Signals.MemoryWidth;   
                 o_Signals.RD         <= i_Signals.RD;        
                 o_Signals.RS1        <= i_Signals.RS1;       
                 o_Signals.RS2        <= i_Signals.RS2;       

@@ -1,41 +1,28 @@
--------------------------------------------------------------------------
--- Henry Duwe
--- Department of Electrical and Computer Engineering
--- Iowa State University
--------------------------------------------------------------------------
-
--------------------------------------------------------------------------
--- RISCV_Processor.vhd
--- DESCRIPTION: This file contains a skeleton of a software-scheduled 
--- pipelined RISCV_Processor implementation.
-
--- 01.29.2019 by H3::Design created.
--- 02.11.2025 by Connor J. Link authored RISC-V implementation.
--- 02.16.2025 by Connor J. Link authored 5-stage pipeline upgrade.
--------------------------------------------------------------------------
+-- Horizon: processor.vhd
+-- (c) 2026 Connor J. Link. All rights reserved.
 
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
 library work;
-use work.RISCV_types.all;
+use work.types.all;
 
-entity RISCV_Processor is
+entity processor is
     generic(
-        N : integer := work.RISCV_types.DATA_WIDTH
+        N : integer := work.types.DATA_WIDTH
     );
     port(
-        i_Clock      : in  std_logic;
-        i_Reset      : in  std_logic;
-        iInstLd   : in  std_logic;
-        iInstAddr : in  std_logic_vector(N-1 downto 0);
-        iInstExt  : in  std_logic_vector(N-1 downto 0);
-        oALUOut   : out std_logic_vector(N-1 downto 0) 
+        i_Clock               : in  std_logic;
+        i_Reset               : in  std_logic;
+        i_InstructionLoad     : in  std_logic;
+        i_InstructionAddress  : in  std_logic_vector(N-1 downto 0);
+        i_InstructionExternal : in  std_logic_vector(N-1 downto 0);
+        o_ALUOutput           : out std_logic_vector(N-1 downto 0) 
     ); 
-end RISCV_Processor;
+end processor;
 
-architecture structure of RISCV_Processor is
+architecture implementation of processor is
 
 -- Required data memory signals
 signal s_DMemWr       : std_logic;                      -- use this signal as the final active high data memory write enable signal
@@ -120,21 +107,21 @@ signal s_MemALUOperand2 : std_logic_vector(31 downto 0) := (others => '0');
 ---- Thus, EXMEM_IF_raw are the `input` signals to the pipeline register after the ALU
 ---- stage driven by the instruction register (so IPAddr, Insn, etc.)
 ----------------------------------------------------------------------------------
-signal IFID_IF_raw,   IFID_IF_buf   : work.RISCV_types.insn_record_t;
+signal IFID_IF_raw,   IFID_IF_buf   : work.types.insn_record_t;
 
-signal IDEX_IF_raw,   IDEX_IF_buf   : work.RISCV_types.insn_record_t;
-signal IDEX_ID_raw,   IDEX_ID_buf   : work.RISCV_types.driver_record_t;
+signal IDEX_IF_raw,   IDEX_IF_buf   : work.types.insn_record_t;
+signal IDEX_ID_raw,   IDEX_ID_buf   : work.types.driver_record_t;
 
-signal EXMEM_IF_raw,  EXMEM_IF_buf  : work.RISCV_types.insn_record_t;
-signal EXMEM_ID_raw,  EXMEM_ID_buf  : work.RISCV_types.driver_record_t;
-signal EXMEM_EX_raw,  EXMEM_EX_buf  : work.RISCV_types.alu_record_t;
+signal EXMEM_IF_raw,  EXMEM_IF_buf  : work.types.insn_record_t;
+signal EXMEM_ID_raw,  EXMEM_ID_buf  : work.types.driver_record_t;
+signal EXMEM_EX_raw,  EXMEM_EX_buf  : work.types.alu_record_t;
 
-signal MEMWB_IF_raw,  MEMWB_IF_buf  : work.RISCV_types.insn_record_t;
-signal MEMWB_ID_raw,  MEMWB_ID_buf  : work.RISCV_types.driver_record_t;
-signal MEMWB_EX_raw,  MEMWB_EX_buf  : work.RISCV_types.alu_record_t;
-signal MEMWB_MEM_raw, MEMWB_MEM_buf : work.RISCV_types.mem_record_t;
+signal MEMWB_IF_raw,  MEMWB_IF_buf  : work.types.insn_record_t;
+signal MEMWB_ID_raw,  MEMWB_ID_buf  : work.types.driver_record_t;
+signal MEMWB_EX_raw,  MEMWB_EX_buf  : work.types.alu_record_t;
+signal MEMWB_MEM_raw, MEMWB_MEM_buf : work.types.mem_record_t;
 
-signal WB_WB_raw,     WB_WB_buf     : work.RISCV_types.wb_record_t;
+signal WB_WB_raw,     WB_WB_buf     : work.types.wb_record_t;
 
 signal s_IFID_Stall,  s_IFID_Flush  : std_logic := '0';
 signal s_IDEX_Stall,  s_IDEX_Flush  : std_logic := '0';
@@ -156,28 +143,28 @@ signal s_ForwardMemData     : natural := 0;
 ----------------------------------------------------------------------------------
 function ExtendMemoryData(
     Data             : std_logic_vector(31 downto 0);
-    LSWidth          : natural;
+    MemoryWidth          : natural;
     SignExtend       : std_logic;
     DestinationWidth : natural
 ) return std_logic_vector is
     variable Result : std_logic_vector(DestinationWidth - 1 downto 0);
 begin
-    case LSWidth is
-        when work.RISCV_types.BYTE =>
+    case MemoryWidth is
+        when work.types.BYTE =>
             if SignExtend = '0' then
                 Result := std_logic_vector(resize(unsigned(Data(7 downto 0)), DestinationWidth));
             else
                 Result := std_logic_vector(resize(signed(Data(7 downto 0)), DestinationWidth));
             end if;
 
-        when work.RISCV_types.HALF =>
+        when work.types.HALF =>
             if SignExtend = '0' then
                 Result := std_logic_vector(resize(unsigned(Data(15 downto 0)), DestinationWidth));
             else
                 Result := std_logic_vector(resize(signed(Data(15 downto 0)), DestinationWidth));
             end if;
 
-        when work.RISCV_types.WORD =>
+        when work.types.WORD =>
             if SignExtend = '0' then
                 Result := std_logic_vector(resize(unsigned(Data(31 downto 0)), DestinationWidth));
             else
@@ -209,26 +196,26 @@ begin
     nCLK <= not i_Clock;
 
     -- This is required to be your final input to your instruction memory. This provides a feasible method to externally load the memory module which means that the synthesis tool must assume it knows nothing about the values stored in the instruction memory. If this is not included, much, if not all of the design is optimized out because the synthesis tool will believe the memory to be all zeros.
-    with iInstLd select
+    with i_InstructionLoad select
         s_IMemAddr <= s_NextInstAddr when '0',
-                      iInstAddr      when others;
+                      i_InstructionAddress      when others;
 
     IMem: mem
         generic map(
-            ADDR_WIDTH => work.RISCV_types.ADDR_WIDTH,
+            ADDR_WIDTH => work.types.ADDR_WIDTH,
             DATA_WIDTH => N
         )
         port map(
             clk  => i_Clock,
             addr => s_IPAddr(11 downto 2),
-            data => iInstExt,
-            we   => iInstLd,
+            data => i_InstructionExternal,
+            we   => i_InstructionLoad,
             q    => s_Inst
         );
   
     DMem: mem
         generic map(
-            ADDR_WIDTH => work.RISCV_types.ADDR_WIDTH,
+            ADDR_WIDTH => work.types.ADDR_WIDTH,
             DATA_WIDTH => N
         )
         port map(
@@ -239,12 +226,12 @@ begin
             q    => s_DMemOut
         );
 
-    MEMWB_MEM_raw.Data <= ExtendMemoryData(s_DMemOut, MEMWB_ID_raw.LSWidth, '1', 32);
-    IDEX_ID_raw.Data <= ExtendMemoryData(s_DMemOut, IDEX_ID_raw.LSWidth, '1', 32);
+    MEMWB_MEM_raw.Data <= ExtendMemoryData(s_DMemOut, MEMWB_ID_raw.MemoryWidth, '1', 32);
+    IDEX_ID_raw.Data <= ExtendMemoryData(s_DMemOut, IDEX_ID_raw.MemoryWidth, '1', 32);
 
 
     -----------------------------------------------------
-    ---- Instruction -> Driver stage register(s)
+    ---- Instruction -> ControlUnit stage register(s)
     -----------------------------------------------------
 
     CPU_Insn_IR: entity work.reg_insn
@@ -263,10 +250,10 @@ begin
 
 
     -----------------------------------------------------
-    ---- Driver -> ALU stage register(s)
+    ---- ControlUnit -> ALU stage register(s)
     -----------------------------------------------------
 
-    CPU_Driver_IR: entity work.reg_insn
+    CPU_ControlUnit_IR: entity work.reg_insn
         port map(
             i_Clock     => i_Clock,
             i_Reset     => i_Reset,
@@ -277,7 +264,7 @@ begin
             o_Signals => IDEX_IF_buf
         );
 
-    CPU_Driver_DR: entity work.reg_driver
+    CPU_ControlUnit_DR: entity work.reg_driver
         port map(
             i_Clock     => i_Clock,
             i_Reset     => i_Reset,
@@ -397,7 +384,7 @@ begin
     WB_WB_raw.F       <= MEMWB_EX_buf.F;
     WB_WB_raw.Data    <= MEMWB_MEM_buf.Data;
     WB_WB_raw.Forward <= s_ForwardMemData;
-    WB_WB_raw.LSWidth <= MEMWB_ID_buf.LSWidth;
+    WB_WB_raw.MemoryWidth <= MEMWB_ID_buf.MemoryWidth;
 
     CPU_WB_WR: entity work.reg_wb
         port map(
@@ -420,8 +407,8 @@ begin
     ---- Instruction Pointer Unit
     -----------------------------------------------------
 
-    s_BranchAddr <= std_logic_vector(signed(IDEX_IF_buf.IPAddr) + signed(IDEX_ID_buf.Imm)) when (IDEX_ID_buf.BranchMode = work.RISCV_types.JAL_OR_BCC) else
-                    std_logic_vector(signed(IDEX_ID_buf.DS1)    + signed(IDEX_ID_buf.Imm)) when (IDEX_ID_buf.BranchMode = work.RISCV_types.JALR)       else 
+    s_BranchAddr <= std_logic_vector(signed(IDEX_IF_buf.IPAddr) + signed(IDEX_ID_buf.Imm)) when (IDEX_ID_buf.BranchMode = work.types.JAL_OR_BCC) else
+                    std_logic_vector(signed(IDEX_ID_buf.DS1)    + signed(IDEX_ID_buf.Imm)) when (IDEX_ID_buf.BranchMode = work.types.JALR)       else 
                     (others => '0');
 
     CPU_IP: entity work.ip
@@ -452,16 +439,16 @@ begin
 
     with s_ForwardBGUOperand1 select
         s_BGUOperand1 <=
-            EXMEM_EX_buf.F     when work.RISCV_types.FROM_EXMEM_ALU,
-            MEMWB_EX_buf.F     when work.RISCV_types.FROM_MEMWB_ALU,
-            MEMWB_MEM_buf.Data when work.RISCV_types.FROM_MEM,
+            EXMEM_EX_buf.F     when work.types.FROM_EXMEM_ALU,
+            MEMWB_EX_buf.F     when work.types.FROM_MEMWB_ALU,
+            MEMWB_MEM_buf.Data when work.types.FROM_MEM,
             IDEX_ID_buf.DS1    when others;
 
     with s_ForwardBGUOperand2 select
         s_BGUOperand2 <= 
-            EXMEM_EX_buf.F     when work.RISCV_types.FROM_EXMEM_ALU,
-            MEMWB_EX_buf.F     when work.RISCV_types.FROM_MEMWB_ALU,
-            MEMWB_MEM_buf.Data when work.RISCV_types.FROM_MEM,
+            EXMEM_EX_buf.F     when work.types.FROM_EXMEM_ALU,
+            MEMWB_EX_buf.F     when work.types.FROM_MEMWB_ALU,
+            MEMWB_MEM_buf.Data when work.types.FROM_MEM,
             IDEX_ID_buf.DS2    when others;
 
     CPU_BGU: entity work.bgu
@@ -481,22 +468,22 @@ begin
     ---- Processor Control Unit
     -----------------------------------------------------
 
-    CPU_Driver: entity work.driver
+    CPU_ControlUnit: entity work.driver
         port map(
             i_Clock        => i_Clock,
             i_Reset        => i_Reset,
-            i_Insn       => IDEX_IF_raw.Insn,    
-            o_MemWrite   => IDEX_ID_raw.MemWrite,
-            o_RegWrite   => IDEX_ID_raw.RegWrite,
-            o_RFSrc      => IDEX_ID_raw.RFSrc,
-            o_ALUSrc     => IDEX_ID_raw.ALUSrc,
-            o_ALUOp      => IDEX_ID_raw.ALUOp,
-            o_BGUOp      => IDEX_ID_raw.BGUOp,
-            o_LSWidth    => IDEX_ID_raw.LSWidth,
+            i_Instruction       => IDEX_IF_raw.Insn,    
+            o_MemoryWriteEnable   => IDEX_ID_raw.MemWrite,
+            o_RegisterWriteEnable   => IDEX_ID_raw.RegWrite,
+            o_RegisterSource      => IDEX_ID_raw.RFSrc,
+            o_ALUSource     => IDEX_ID_raw.ALUSrc,
+            o_ALUOperator      => IDEX_ID_raw.ALUOp,
+            o_BGUOperator      => IDEX_ID_raw.BGUOp,
+            o_MemoryWidth    => IDEX_ID_raw.MemoryWidth,
             o_RD         => IDEX_ID_raw.RD,
             o_RS1        => IDEX_ID_raw.RS1,
             o_RS2        => IDEX_ID_raw.RS2, 
-            o_Imm        => IDEX_ID_raw.Imm,
+            o_Immediate        => IDEX_ID_raw.Imm,
             o_BranchMode => IDEX_ID_raw.BranchMode,
             o_Break      => IDEX_ID_raw.Break,
             o_IsBranch   => IDEX_ID_raw.IsBranch,
@@ -517,27 +504,27 @@ begin
 
     with MEMWB_ID_buf.RFSrc select
         s_RegWrData <=
-            MEMWB_MEM_buf.Data    when work.RISCV_types.FROM_RAM,
-            MEMWB_EX_buf.F        when work.RISCV_types.FROM_ALU,
-            MEMWB_IF_buf.LinkAddr when work.RISCV_types.FROM_NEXTIP,
-            MEMWB_ID_buf.Imm      when work.RISCV_types.FROM_IMM,
+            MEMWB_MEM_buf.Data    when work.types.FROM_RAM,
+            MEMWB_EX_buf.F        when work.types.FROM_ALU,
+            MEMWB_IF_buf.LinkAddr when work.types.FROM_NEXTIP,
+            MEMWB_ID_buf.Imm      when work.types.FROM_IMM,
             (others => '0')       when others;
 
 
     s_RegWr <= MEMWB_ID_buf.RegWrite;
     s_RegWrAddr <= MEMWB_ID_buf.RD;
 
-    CPU_RegisterFile: entity work.regfile
+    CPU_RegisterFile: entity work.register_file
         port map(
             i_Clock => nCLK,
             i_Reset => i_Reset,
-            i_RS1 => IDEX_ID_raw.RS1, -- NOTE: registers reads occur in the decode stage unless forwarding
-            i_RS2 => IDEX_ID_raw.RS2,
-            i_RD  => s_RegWrAddr,
-            i_WE  => s_RegWr,
-            i_D   => s_RegWrData,
-            o_DS1 => s_RS1Data,
-            o_DS2 => s_RS2Data
+            i_RS1   => IDEX_ID_raw.RS1, -- NOTE: registers reads occur in the decode stage unless forwarding
+            i_RS2   => IDEX_ID_raw.RS2,
+            i_RD    => s_RegWrAddr,
+            i_WE    => s_RegWr,
+            i_D     => s_RegWrData,
+            o_DS1   => s_RS1Data,
+            o_DS2   => s_RS2Data
         );
 
     -----------------------------------------------------
@@ -547,35 +534,35 @@ begin
     ---- Arithmetic Logic Unit
     -----------------------------------------------------
 
-    s_MemALUOperand1 <= MEMWB_MEM_buf.Data when (MEMWB_ID_buf.LSWidth /= 0) else
+    s_MemALUOperand1 <= MEMWB_MEM_buf.Data when (MEMWB_ID_buf.MemoryWidth /= 0) else
                         MEMWB_EX_buf.F;
 
-    s_MemALUOperand2 <= MEMWB_MEM_buf.Data when (MEMWB_ID_buf.LSWidth /= 0) else
+    s_MemALUOperand2 <= MEMWB_MEM_buf.Data when (MEMWB_ID_buf.MemoryWidth /= 0) else
                         MEMWB_EX_buf.F;      
 
     with s_ForwardALUOperand1 select
         s_ALUOperand1 <=
-            EXMEM_EX_buf.F   when work.RISCV_types.FROM_EX,
-            s_MemALUOperand1 when work.RISCV_types.FROM_MEM,
-            MEMWB_EX_buf.F   when work.RISCV_types.FROM_MEMWB_ALU,
+            EXMEM_EX_buf.F   when work.types.FROM_EX,
+            s_MemALUOperand1 when work.types.FROM_MEM,
+            MEMWB_EX_buf.F   when work.types.FROM_MEMWB_ALU,
             IDEX_ID_buf.DS1  when others;
 
     with s_ForwardALUOperand2 select
         s_RealALUOperand2 <=
-            EXMEM_EX_buf.F   when work.RISCV_types.FROM_EX,
-            MEMWB_EX_buf.F   when work.RISCV_types.FROM_MEMWB_ALU,
-            s_MemALUOperand2 when work.RISCV_types.FROM_MEM,
+            EXMEM_EX_buf.F   when work.types.FROM_EX,
+            MEMWB_EX_buf.F   when work.types.FROM_MEMWB_ALU,
+            s_MemALUOperand2 when work.types.FROM_MEM,
             s_ALUOperand2    when others;
 
     -- NOTE: only the first operand is backwards here because IPToALU (for `auipc`) must take precedence over any potential data forwarding
-    s_RealALUOperand1 <= (others => '0')    when (IDEX_ID_buf.ALUSrc  = work.RISCV_types.ALUSRC_BIGIMM) else
+    s_RealALUOperand1 <= (others => '0')    when (IDEX_ID_buf.ALUSrc  = work.types.ALUSRC_BIGIMM) else
                          IDEX_IF_buf.IPAddr when (IDEX_ID_buf.IPToALU = '1') else
                          s_ALUOperand1      when (IDEX_ID_buf.IPToALU = '0') else
                          (others => '0');
 
-    s_ALUOperand2 <= IDEX_ID_buf.Imm when (IDEX_ID_buf.ALUSrc = work.RISCV_types.ALUSRC_IMM)    else
-                     IDEX_ID_buf.Imm when (IDEX_ID_buf.ALUSrc = work.RISCV_types.ALUSRC_BIGIMM) else
-                     IDEX_ID_buf.DS2 when (IDEX_ID_buf.ALUSrc = work.RISCV_types.ALUSRC_REG)    else
+    s_ALUOperand2 <= IDEX_ID_buf.Imm when (IDEX_ID_buf.ALUSrc = work.types.ALUSRC_IMM)    else
+                     IDEX_ID_buf.Imm when (IDEX_ID_buf.ALUSrc = work.types.ALUSRC_BIGIMM) else
+                     IDEX_ID_buf.DS2 when (IDEX_ID_buf.ALUSrc = work.types.ALUSRC_REG)    else
                      (others => '0');
 
     CPU_ALU: entity work.alu
@@ -587,7 +574,7 @@ begin
             o_Co    => EXMEM_EX_raw.Co
         );
 
-    oALUOut <= EXMEM_EX_raw.F;
+    o_ALUOutput <= EXMEM_EX_raw.F;
 
     -----------------------------------------------------
 
@@ -601,16 +588,16 @@ begin
 
     with WB_WB_buf.Forward select 
         s_ForwardedDMemData <= 
-            ExtendMemoryData(WB_WB_buf.Data, WB_WB_buf.LSWidth,    '1', 32) when work.RISCV_types.FROM_MEM,
-            ExtendMemoryData(MEMWB_EX_buf.F, MEMWB_ID_buf.LSWidth, '1', 32) when work.RISCV_types.FROM_EXMEM_ALU,
-            ExtendMemoryData(WB_WB_buf.F,    WB_WB_buf.LSWidth,    '1', 32) when work.RISCV_types.FROM_MEMWB_ALU,     
+            ExtendMemoryData(WB_WB_buf.Data, WB_WB_buf.MemoryWidth,    '1', 32) when work.types.FROM_MEM,
+            ExtendMemoryData(MEMWB_EX_buf.F, MEMWB_ID_buf.MemoryWidth, '1', 32) when work.types.FROM_EXMEM_ALU,
+            ExtendMemoryData(WB_WB_buf.F,    WB_WB_buf.MemoryWidth,    '1', 32) when work.types.FROM_MEMWB_ALU,     
             (others => '0')   when others;
 
 
     s_DMemData <= s_ForwardedDMemData when (WB_WB_buf.Forward /= 0) else
-                  std_logic_vector(resize(unsigned(EXMEM_ID_buf.DS2(7  downto 0)), s_DMemData'length)) when (EXMEM_ID_buf.LSWidth = work.RISCV_types.BYTE) else
-                  std_logic_vector(resize(unsigned(EXMEM_ID_buf.DS2(15 downto 0)), s_DMemData'length)) when (EXMEM_ID_buf.LSWidth = work.RISCV_types.HALF) else
-                  std_logic_vector(resize(unsigned(EXMEM_ID_buf.DS2(31 downto 0)), s_DMemData'length)) when (EXMEM_ID_buf.LSWidth = work.RISCV_types.WORD) else
+                  std_logic_vector(resize(unsigned(EXMEM_ID_buf.DS2(7  downto 0)), s_DMemData'length)) when (EXMEM_ID_buf.MemoryWidth = work.types.BYTE) else
+                  std_logic_vector(resize(unsigned(EXMEM_ID_buf.DS2(15 downto 0)), s_DMemData'length)) when (EXMEM_ID_buf.MemoryWidth = work.types.HALF) else
+                  std_logic_vector(resize(unsigned(EXMEM_ID_buf.DS2(31 downto 0)), s_DMemData'length)) when (EXMEM_ID_buf.MemoryWidth = work.types.WORD) else
                   (others => '0');
 
     -----------------------------------------------------
@@ -624,10 +611,10 @@ begin
     -- Hence, any hazard checks will need to also inspect for memory or register write 
     -- to determine to which case a particular hazard corresponds.
 
-    s_IFID_IsLoad  <= '1' when (IDEX_ID_raw.LSWidth  /= 0) else '0';
-    s_IDEX_IsLoad  <= '1' when (IDEX_ID_buf.LSWidth  /= 0) else '0';
-    s_EXMEM_IsLoad <= '1' when (EXMEM_ID_buf.LSWidth /= 0) else '0';
-    s_MEMWB_IsLoad <= '1' when (MEMWB_ID_buf.LSWidth /= 0) else '0';
+    s_IFID_IsLoad  <= '1' when (IDEX_ID_raw.MemoryWidth  /= 0) else '0';
+    s_IDEX_IsLoad  <= '1' when (IDEX_ID_buf.MemoryWidth  /= 0) else '0';
+    s_EXMEM_IsLoad <= '1' when (EXMEM_ID_buf.MemoryWidth /= 0) else '0';
+    s_MEMWB_IsLoad <= '1' when (MEMWB_ID_buf.MemoryWidth /= 0) else '0';
     
     CPU_HMU: entity work.hmu
         port map(
@@ -665,7 +652,7 @@ begin
             o_EXMEM_Stall    => s_EXMEM_Stall
         );
 
-    CPU_DFU: entity work.dfu
+    CPU_DFU: entity work.forwarding_unit
         port map(
             i_IFID_RS1              => IDEX_ID_raw.RS1,
             i_IFID_RS2              => IDEX_ID_raw.RS2,
@@ -702,5 +689,4 @@ begin
 
     -----------------------------------------------------
 
-end structure;
-
+end implementation;

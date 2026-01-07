@@ -11,7 +11,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
-use work.RISCV_types.all;
+use work.types.all;
 
 entity reg_insn is
     port(
@@ -20,8 +20,8 @@ entity reg_insn is
         i_Stall    : in  std_logic;
         i_Flush    : in  std_logic;
 
-        i_Signals  : in  work.RISCV_types.insn_record_t;
-        o_Signals  : out work.RISCV_types.insn_record_t
+        i_Signals  : in  work.types.insn_record_t;
+        o_Signals  : out work.types.insn_record_t
     );
 end reg_insn;
 

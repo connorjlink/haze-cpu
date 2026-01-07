@@ -12,7 +12,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 library work;
-use work.RISCV_types.all;
+use work.types.all;
 
 entity hmu is
     port(
@@ -81,7 +81,7 @@ begin
 
 
         -- Detect jal/j, which doesn't rely on any external data to execute, but will need to clear the pipeline until the remaining instructions are committed
-        if i_BranchMode = work.RISCV_types.JAL_OR_BCC and i_IDEX_IsBranch = '0' then
+        if i_BranchMode = work.types.JAL_OR_BCC and i_IDEX_IsBranch = '0' then
             -- No extra dependencies, so branch is computed taken, no stall to allow IP to update
             --v_IP_Stall := '1';
             v_IFID_Flush := '1';
@@ -90,8 +90,8 @@ begin
 
 
         -- Detect jalr/jr, which relies on the source register for the branch target
-        elsif (i_BranchMode = work.RISCV_types.JALR) or
-              (i_BranchMode = work.RISCV_types.JAL_OR_BCC and i_IDEX_IsBranch = '1') then
+        elsif (i_BranchMode = work.types.JALR) or
+              (i_BranchMode = work.types.JAL_OR_BCC and i_IDEX_IsBranch = '1') then
 
             -- NOTE: if jr, then the link register is x0 which will never cause a hazard
             if (i_IDEX_RD = i_IFID_RS1 and i_IDEX_RD /= 5x"0") or

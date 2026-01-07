@@ -11,7 +11,7 @@ use work.and_2.all;
 use work.or_2.all;
 use work.xor_2.all;
 use work.multiplexer_2to1_N.all;
-use work.RISCV_types.all;
+use work.types.all;
 
 entity arithmetic_logic_unit is
     generic(

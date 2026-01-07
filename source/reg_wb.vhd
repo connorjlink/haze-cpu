@@ -11,7 +11,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
-use work.RISCV_types.all;
+use work.types.all;
 
 entity reg_wb is
     port(
@@ -20,8 +20,8 @@ entity reg_wb is
         i_Stall    : in  std_logic;
         i_Flush    : in  std_logic;
 
-        i_Signals  : in  work.RISCV_types.wb_record_t;
-        o_Signals  : out work.RISCV_types.wb_record_t
+        i_Signals  : in  work.types.wb_record_t;
+        o_Signals  : out work.types.wb_record_t
     );
 end reg_wb;
 
@@ -36,7 +36,7 @@ begin
             o_Signals.F       <= (others => '0');
             o_Signals.Data    <= (others => '0');
             o_Signals.Forward <= 0;
-            o_Signals.LSWidth <= 0;
+            o_Signals.MemoryWidth <= 0;
 
         elsif rising_edge(i_Clock) then
 
@@ -45,14 +45,14 @@ begin
                 o_Signals.F       <= (others => '0');
                 o_Signals.Data    <= (others => '0');
                 o_Signals.Forward <= 0;
-                o_Signals.LSWidth <= 0;
+                o_Signals.MemoryWidth <= 0;
 
             -- alu register contents
             elsif i_STALL = '0' then
                 o_Signals.F       <= i_Signals.F;
                 o_Signals.Data    <= i_Signals.Data;
                 o_Signals.Forward <= i_Signals.Forward;
-                o_Signals.LSWidth <= i_Signals.LSWidth;
+                o_Signals.MemoryWidth <= i_Signals.MemoryWidth;
             
             end if;
 

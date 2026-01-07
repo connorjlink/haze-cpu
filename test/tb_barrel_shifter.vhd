@@ -15,7 +15,7 @@ library std;
 use std.env.all;
 use std.textio.all;
 library work;
-use work.RISCV_types.all;
+use work.types.all;
 
 entity tb_barrel_shifter is
     generic(gCLK_HPER  : time := 10 ns;

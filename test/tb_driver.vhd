@@ -30,19 +30,19 @@ component driver is
     port(
         i_Clock        : in  std_logic;
         i_Reset        : in  std_logic;
-        i_Insn       : in  std_logic_vector(31 downto 0);
+        i_Instruction       : in  std_logic_vector(31 downto 0);
         i_MaskStall  : in  std_logic;
-        o_MemWrite   : out std_logic;
-        o_RegWrite   : out std_logic;
-        o_RFSrc      : out natural; -- 0 = memory, 1 = ALU, 2 = IP+4
-        o_ALUSrc     : out std_logic; -- 0 = register, 1 = immediate
-        o_ALUOp      : out natural;
-        o_BGUOp      : out natural;
-        o_LSWidth    : out natural;
+        o_MemoryWriteEnable   : out std_logic;
+        o_RegisterWriteEnable   : out std_logic;
+        o_RegisterSource      : out natural; -- 0 = memory, 1 = ALU, 2 = IP+4
+        o_ALUSource     : out std_logic; -- 0 = register, 1 = immediate
+        o_ALUOperator      : out natural;
+        o_BGUOperator      : out natural;
+        o_MemoryWidth    : out natural;
         o_RD         : out std_logic_vector(4 downto 0);
         o_RS1        : out std_logic_vector(4 downto 0);
         o_RS2        : out std_logic_vector(4 downto 0);
-        o_Imm        : out std_logic_vector(31 downto 0);
+        o_Immediate        : out std_logic_vector(31 downto 0);
         o_BranchMode : out natural;
         o_Break      : out std_logic;
         o_IsBranch   : out std_logic;
@@ -64,7 +64,7 @@ signal s_oRFSrc      : natural;
 signal s_oALUSrc     : std_logic;
 signal s_oALUOp      : natural;
 signal s_oBGUOp      : natural;
-signal s_oLSWidth    : natural;
+signal s_oMemoryWidth    : natural;
 signal s_oRD         : std_logic_vector(4 downto 0);
 signal s_oRS1        : std_logic_vector(4 downto 0);
 signal s_oRS2        : std_logic_vector(4 downto 0);
@@ -82,19 +82,19 @@ DUTO: driver
     port map(
         i_Clock        => CLK,
         i_Reset        => reset,
-        i_Insn       => s_iInsn,
+        i_Instruction       => s_iInsn,
         i_MaskStall  => s_iMaskStall,
-        o_MemWrite   => s_oMemWrite,
-        o_RegWrite   => s_oRegWrite,
-        o_RFSrc      => s_oRFSrc,
-        o_ALUSrc     => s_oALUSrc,
-        o_ALUOp      => s_oALUOp,
-        o_BGUOp      => s_oBGUOp,
-        o_LSWidth    => s_oLSWidth,
+        o_MemoryWriteEnable   => s_oMemWrite,
+        o_RegisterWriteEnable   => s_oRegWrite,
+        o_RegisterSource      => s_oRFSrc,
+        o_ALUSource     => s_oALUSrc,
+        o_ALUOperator      => s_oALUOp,
+        o_BGUOperator      => s_oBGUOp,
+        o_MemoryWidth    => s_oMemoryWidth,
         o_RD         => s_oRD,
         o_RS1        => s_oRS1,
         o_RS2        => s_oRS2,
-        o_Imm        => s_oImm,
+        o_Immediate        => s_oImm,
         o_Break      => s_oBreak,
         o_IsBranch   => s_oIsBranch,
         o_nInc2_Inc4 => s_onInc2_Inc4,

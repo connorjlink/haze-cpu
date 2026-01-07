@@ -12,7 +12,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 library work;
-use work.RISCV_types.all;
+use work.types.all;
 
 entity bgu is
     port(
@@ -42,49 +42,49 @@ begin
         v_BranchNotTaken := '0';
 
         case i_BGUOp is
-            when work.RISCV_types.BEQ =>
+            when work.types.BEQ =>
                 if unsigned(i_DS1) = unsigned(i_DS2) then
                     v_BranchTaken := '1';
                 else
                     v_BranchNotTaken := '1';
                 end if;
 
-            when work.RISCV_types.BNE =>
+            when work.types.BNE =>
                 if unsigned(i_DS1) /= unsigned(i_DS2) then
                     v_BranchTaken := '1';
                 else
                     v_BranchNotTaken := '1';
                 end if;
 
-            when work.RISCV_types.BLT =>
+            when work.types.BLT =>
                 if signed(i_DS1) < signed(i_DS2) then
                     v_BranchTaken := '1';
                 else
                     v_BranchNotTaken := '1';
                 end if;
 
-            when work.RISCV_types.BGE =>
+            when work.types.BGE =>
                 if signed(i_DS1) >= signed(i_DS2) then
                     v_BranchTaken := '1';
                 else
                     v_BranchNotTaken := '1';
                 end if;
 
-            when work.RISCV_types.BLTU =>
+            when work.types.BLTU =>
                 if unsigned(i_DS1) < unsigned(i_DS2) then
                     v_BranchTaken := '1';
                 else
                     v_BranchNotTaken := '1';
                 end if;
 
-            when work.RISCV_types.BGEU =>
+            when work.types.BGEU =>
                 if unsigned(i_DS1) >= unsigned(i_DS2) then
                     v_BranchTaken := '1';
                 else
                     v_BranchNotTaken := '1';
                 end if;
 
-            when work.RISCV_types.J =>
+            when work.types.J =>
                 v_BranchTaken := '1';
 
             when others =>

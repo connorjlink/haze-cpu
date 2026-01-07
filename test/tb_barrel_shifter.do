@@ -10,7 +10,7 @@
 ##              the waveform and runs the simulation.
 #########################################################################
 
-vcom -2008 -work work ../src/RISCV_types.vhd
+vcom -2008 -work work ../src/types.vhd
 vcom -2008 -work work ../src/andg2.vhd
 vcom -2008 -work work ../src/org2.vhd
 vcom -2008 -work work ../src/invg.vhd

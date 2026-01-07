@@ -60,4 +60,4 @@ begin
             o_Carry => o_Carry
         );
 
-end structural;
+end implementation;

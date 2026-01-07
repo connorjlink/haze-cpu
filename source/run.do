@@ -1,6 +1,6 @@
 quit -sim
 
-vcom -2008 -work work RISCV_types.vhd
+vcom -2008 -work work types.vhd
 vcom -2008 -work work *.vhd
 vcom -2008 -work work TopLevel/*.vhd
 

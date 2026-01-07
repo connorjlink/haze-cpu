@@ -3,6 +3,8 @@
 
 library IEEE;
 use IEEE.std_logic_1164.all;
+library work;
+use work.adder_1.all;
 
 entity adder_N is
     generic(
@@ -30,7 +32,7 @@ begin
     -- Ripple-carry adder design, NOTE: limits maximum frequency to about 5 MHz per Quartus synthesis reports on Cyclone V
     g_NBit_Adder: for i in 0 to N-1
     generate
-        ADDERI: adder 
+        ADDERI: entity work.adder_1
             port map(
                 i_B => i_B(i),
                 i_Carry => s_C(i),
