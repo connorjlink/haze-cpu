@@ -8,7 +8,7 @@ use work.adder_1.all;
 
 entity adder_N is
     generic(
-        N : integer := 32
+        constant N : integer := 32
     );
     port(
         i_A     : in  std_logic_vector(N-1 downto 0);

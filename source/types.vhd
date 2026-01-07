@@ -1,13 +1,5 @@
--------------------------------------------------------------------------
--- Author: Connor Link
--- Date: 02.11.2025
--- Files: types.vhd
--------------------------------------------------------------------------
--- Description: This file contains some types that 3810 students
--- may want to use for their RISC-V implementation. This file is guaranteed to 
--- compile first, so if any types, constants, functions, etc., etc., are wanted, 
--- students should declare them here.
--------------------------------------------------------------------------
+-- Horizon: types.vhd
+-- (c) 2026 Connor J. Link. All rights reserved.
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -99,7 +91,7 @@ end record instruction_record_t;
 constant INSTRUCTION_NOP : instruction_record_t := (
     InstructionAddress => (others => '0'),
     LinkAddress        => (others => '0'),
-    Instruction        => (others => '0')
+    Instruction        => 32x"00000013"
 );
 
 ------------------------------------------------------

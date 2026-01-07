@@ -40,11 +40,7 @@ signal s_IMemAddr     : std_logic_vector(N-1 downto 0); -- Do not assign this si
 signal s_NextInstAddr : std_logic_vector(N-1 downto 0); -- use this signal as your intended final instruction memory address input.
 signal s_Inst         : std_logic_vector(N-1 downto 0); -- use this signal as the instruction signal 
 
--- Required halt signal -- for simulation
 signal s_Halt         : std_logic;  -- this signal indicates to the simulation that intended program execution has completed.
-
--- Required overflow signal -- for overflow exception detection
-signal s_Ovfl         : std_logic;
 
 component mem is
     generic(
@@ -77,7 +73,7 @@ signal s_BranchTaken : std_logic;
 signal s_BranchNotTaken : std_logic;
 
 -- Signal to hold the modified clock
-signal nCLK  : std_logic;
+signal n_Clock  : std_logic;
 
 -- Signals to hold the computed memory instruction address input to the IP
 signal s_BranchAddr : std_logic_vector(31 downto 0);
@@ -141,6 +137,7 @@ signal s_ForwardMemData     : natural := 0;
 ----------------------------------------------------------------------------------
 ---- Helper Function for Load/Store Data Size Extension
 ----------------------------------------------------------------------------------
+
 function ExtendMemoryData(
     Data             : std_logic_vector(31 downto 0);
     MemoryWidth          : natural;
@@ -179,26 +176,21 @@ begin
     return Result;
 
 end function;
+
 ----------------------------------------------------------------------------------
-
-
-
-
 
 begin
 
-    -- NOTE: RISC-V does not support overflow-checked arithmetic.
-    s_Ovfl <= '0';
     -- NOTE: This is probably not the best way to detect a halt condition, but it will at least trap execution when two consecutive illegal instructions retire.
     s_Halt <= (MEMWB_ID_buf.Break and EXMEM_ID_buf.Break);
 
-    
-    nCLK <= not i_Clock;
+    n_Clock <= not i_Clock;
 
     -- This is required to be your final input to your instruction memory. This provides a feasible method to externally load the memory module which means that the synthesis tool must assume it knows nothing about the values stored in the instruction memory. If this is not included, much, if not all of the design is optimized out because the synthesis tool will believe the memory to be all zeros.
     with i_InstructionLoad select
-        s_IMemAddr <= s_NextInstAddr when '0',
-                      i_InstructionAddress      when others;
+        s_IMemAddr <= 
+            s_NextInstAddr       when '0',
+            i_InstructionAddress when others;
 
     IMem: mem
         generic map(
@@ -219,7 +211,7 @@ begin
             DATA_WIDTH => N
         )
         port map(
-            clk  => nCLK, -- i_Clock
+            clk  => n_Clock, -- i_Clock
             addr => s_DMemAddr(11 downto 2),
             data => s_DMemData,
             we   => s_DMemWr,
@@ -231,7 +223,7 @@ begin
 
 
     -----------------------------------------------------
-    ---- Instruction -> ControlUnit stage register(s)
+    ---- Instruction -> Control Unit stage register(s)
     -----------------------------------------------------
 
     CPU_Insn_IR: entity work.reg_insn
@@ -250,27 +242,25 @@ begin
 
 
     -----------------------------------------------------
-    ---- ControlUnit -> ALU stage register(s)
+    ---- Control Unit -> Arithmetic Logic Unit stage register(s)
     -----------------------------------------------------
 
     CPU_ControlUnit_IR: entity work.reg_insn
         port map(
-            i_Clock     => i_Clock,
-            i_Reset     => i_Reset,
+            i_Clock   => i_Clock,
+            i_Reset   => i_Reset,
             i_Stall   => s_IDEX_Stall,
             i_Flush   => s_IDEX_Flush,
-        
             i_Signals => IDEX_IF_raw,
             o_Signals => IDEX_IF_buf
         );
 
     CPU_ControlUnit_DR: entity work.reg_driver
         port map(
-            i_Clock     => i_Clock,
-            i_Reset     => i_Reset,
+            i_Clock   => i_Clock,
+            i_Reset   => i_Reset,
             i_Stall   => s_IDEX_Stall,
             i_Flush   => s_IDEX_Flush,
-        
             i_Signals => IDEX_ID_raw,
             o_Signals => IDEX_ID_buf
         );
@@ -298,22 +288,20 @@ begin
 
     CPU_ALU_DR: entity work.reg_driver
         port map(
-            i_Clock     => i_Clock,
-            i_Reset     => i_Reset,
+            i_Clock   => i_Clock,
+            i_Reset   => i_Reset,
             i_Stall   => s_EXMEM_Stall,
             i_Flush   => s_EXMEM_Flush,
-        
             i_Signals => EXMEM_ID_raw,
             o_Signals => EXMEM_ID_buf
         );
 
     CPU_ALU_AR: entity work.reg_alu
         port map(
-            i_Clock     => i_Clock,
-            i_Reset     => i_Reset,
+            i_Clock   => i_Clock,
+            i_Reset   => i_Reset,
             i_Stall   => s_EXMEM_Stall,
             i_Flush   => s_EXMEM_Flush,
-        
             i_Signals => EXMEM_EX_raw,
             o_Signals => EXMEM_EX_buf
         );
@@ -516,7 +504,7 @@ begin
 
     CPU_RegisterFile: entity work.register_file
         port map(
-            i_Clock => nCLK,
+            i_Clock => n_Clock,
             i_Reset => i_Reset,
             i_RS1   => IDEX_ID_raw.RS1, -- NOTE: registers reads occur in the decode stage unless forwarding
             i_RS2   => IDEX_ID_raw.RS2,

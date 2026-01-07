@@ -10,7 +10,7 @@ use work.not_N.all;
 
 entity addersubtractor_N is
     generic(
-        N : integer := 32
+        constant N : integer := 32
     );
     port(
         i_A             : in  std_logic_vector(N-1 downto 0);

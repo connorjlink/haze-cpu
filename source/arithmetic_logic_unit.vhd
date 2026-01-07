@@ -5,12 +5,6 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 library work;
-use work.barrel_shifter.all;
-use work.addersubtractor_N.all;
-use work.and_2.all;
-use work.or_2.all;
-use work.xor_2.all;
-use work.multiplexer_2to1_N.all;
 use work.types.all;
 
 entity arithmetic_logic_unit is
@@ -22,23 +16,16 @@ entity arithmetic_logic_unit is
         i_B        : in  std_logic_vector(31 downto 0);
         i_Operator : in  natural;
         o_F        : out std_logic_vector(31 downto 0);
-        o_Co       : out std_logic
+        o_Carry    : out std_logic
     );
 end arithmetic_logic_unit;
 
 architecture implementation of arithmetic_logic_unit is
 
 -- Signals to hold the results of each logical unit
-signal s_xorF  : std_logic_vector(N-1 downto 0) := (others => '0');
-signal s_orF   : std_logic_vector(N-1 downto 0) := (others => '0');
-signal s_andF  : std_logic_vector(N-1 downto 0) := (others => '0');
-signal s_addF  : std_logic_vector(N-1 downto 0) := (others => '0');
-signal s_subF  : std_logic_vector(N-1 downto 0) := (others => '0');
-signal s_sllF  : std_logic_vector(N-1 downto 0) := (others => '0');
-signal s_srlF  : std_logic_vector(N-1 downto 0) := (others => '0');
-signal s_sraF  : std_logic_vector(N-1 downto 0) := (others => '0');
-signal s_sltF  : std_logic_vector(N-1 downto 0) := (others => '0');
-signal s_sltuF : std_logic_vector(N-1 downto 0) := (others => '0');
+signal s_XOROut  : std_logic_vector(N-1 downto 0) := (others => '0');
+signal s_OROut   : std_logic_vector(N-1 downto 0) := (others => '0');
+signal s_ANDOut  : std_logic_vector(N-1 downto 0) := (others => '0');
 
 signal s_IsLessSigned   : std_logic := '0';
 signal s_IsLessUnsigned : std_logic := '0';
@@ -64,7 +51,7 @@ begin
             port map(
                 i_A => i_A(i),
                 i_B => i_B(i),
-                o_F => s_xorF(i)
+                o_F => s_XOROut(i)
             );
     end generate g_NBit_XOR;
 
@@ -74,7 +61,7 @@ begin
             port map(
                 i_A => i_A(i),
                 i_B => i_B(i),
-                o_F => s_orF(i)
+                o_F => s_OROut(i)
             );
     end generate g_NBit_OR;
 
@@ -84,7 +71,7 @@ begin
             port map(
                 i_A => i_A(i),
                 i_B => i_B(i),
-                o_F => s_andF(i)
+                o_F => s_ANDOut(i)
             );
     end generate g_NBit_AND;
 
@@ -99,11 +86,11 @@ begin
 
     g_NBit_ALUAdder: entity work.addersubtractor_N
         port map(
-            i_A        => i_A,
-            i_B        => i_B,
-            i_nAdd_Sub => s_IsSubtraction,
-            o_S        => s_AdderSubtractorOut,
-            o_Co       => s_CarryOut
+            i_A             => i_A,
+            i_B             => i_B,
+            i_IsSubtraction => s_IsSubtraction,
+            o_S             => s_AdderSubtractorOut,
+            o_Carry         => s_CarryOut
         );
 
 
@@ -142,22 +129,24 @@ begin
     -- Output Multiplexing
     ------------------------------------------------------
         
-    with i_Operator select o_F <= 
-        s_addF  when ALU_ADD,
-        s_subF  when ALU_SUB,
-        s_andF  when ALU_AND,
-        s_orF   when ALU_OR,
-        s_xorF  when ALU_XOR,
-        s_BarrelShifterOut when ALU_SLL,
-        s_BarrelShifterOut when ALU_SRL,
-        s_BarrelShifterOut when ALU_SRA,
-        s_IsLessSigned     when ALU_SLT,
-        s_IsLessUnsigned   when ALU_SLTU,
-        (others => '0')    when others;
+    with i_Operator select 
+        o_F <= 
+            s_AdderSubtractorOut when ALU_ADD,
+            s_AdderSubtractorOut when ALU_SUB,
+            s_ANDOut             when ALU_AND,
+            s_OROut              when ALU_OR,
+            s_XOROut             when ALU_XOR,
+            s_BarrelShifterOut   when ALU_SLL,
+            s_BarrelShifterOut   when ALU_SRL,
+            s_BarrelShifterOut   when ALU_SRA,
+            s_IsLessSigned       when ALU_SLT,
+            s_IsLessUnsigned     when ALU_SLTU,
+            (others => '0')      when others;
 
-    with i_Operator select o_Co <=
-        s_CarryOut when ALU_ADD,
-        s_subCo when ALU_SUB,
-        '0'     when others;
+    with i_Operator select 
+        o_Carry <=
+            s_CarryOut when ALU_ADD,
+            s_CarryOut when ALU_SUB,
+            '0'        when others;
 
 end implementation;
