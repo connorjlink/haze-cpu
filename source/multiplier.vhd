@@ -5,11 +5,10 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 library work;
 use work.types.all;
-use work.and_2.all;
 
 entity multiplier is
     generic(
-        constant N : natural := types.DATA_WIDTH,
+        constant N : natural := DATA_WIDTH,
         constant W : natural := 2*N
     );
     port(

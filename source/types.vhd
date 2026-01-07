@@ -37,12 +37,12 @@ type data_width_t is (
 type alu_operator_t is (
     ADD_OPERATOR,
     SUB_OPERATOR,
-    BAND_OPERATOR,
-    BOR_OPERATOR,
-    BXOR_OPERATOR,
-    BSLL_OPERATOR,
-    BSRL_OPERATOR,
-    BSRA_OPERATOR,
+    AND_OPERATOR,
+    OR_OPERATOR,
+    XOR_OPERATOR,
+    SLL_OPERATOR,
+    SRL_OPERATOR,
+    SRA_OPERATOR,
     SLT_OPERATOR,
     SLTU_OPERATOR
 );
@@ -107,7 +107,7 @@ type ID_record_t is record
     MemoryWriteEnable   : std_logic;
     RegisterWriteEnable : std_logic;
     RegisterSource      : natural;
-    ALUSource           : natural;
+    ALUSource           : alu_source_t;
     ALUOperator         : natural;
     BGUOperator         : natural;
     MemoryWidth         : natural;

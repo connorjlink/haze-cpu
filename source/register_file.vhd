@@ -6,8 +6,6 @@ use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 library work;
 use work.types.all;
-use work.decoder_5to32.all;
-use work.register_N.all;
 
 entity register_file is
     port(

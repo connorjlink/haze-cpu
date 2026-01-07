@@ -23,9 +23,9 @@ end arithmetic_logic_unit;
 architecture implementation of arithmetic_logic_unit is
 
 -- Signals to hold the results of each logical unit
-signal s_XOROut  : std_logic_vector(N-1 downto 0) := (others => '0');
-signal s_OROut   : std_logic_vector(N-1 downto 0) := (others => '0');
-signal s_ANDOut  : std_logic_vector(N-1 downto 0) := (others => '0');
+signal s_XOROut : std_logic_vector(N-1 downto 0) := (others => '0');
+signal s_OROut  : std_logic_vector(N-1 downto 0) := (others => '0');
+signal s_ANDOut : std_logic_vector(N-1 downto 0) := (others => '0');
 
 signal s_IsLessSigned   : std_logic := '0';
 signal s_IsLessUnsigned : std_logic := '0';
@@ -34,10 +34,9 @@ signal s_IsArithmetic     : std_logic := '0';
 signal s_IsRight          : std_logic := '0';
 signal s_BarrelShifterOut : std_logic_vector(N-1 downto 0) := (others => '0');
 
-signal s_IsSubtraction      : std_logic := '0';
 signal s_AdderSubtractorOut : std_logic_vector(N-1 downto 0) := (others => '0');
-signal s_CarryOut : std_logic := '0';
-
+signal s_IsSubtraction      : std_logic := '0';
+signal s_CarryOut           : std_logic := '0';
 
 begin
 
@@ -80,8 +79,8 @@ begin
     -- Adder/Subtractor
     ------------------------------------------------------
 
-    s_IsSubtraction <= '0' when i_Operator = ALU_ADD else
-                       '1' when i_Operator = ALU_SUB else
+    s_IsSubtraction <= '0' when i_Operator = ADD_OPERATOR else
+                       '1' when i_Operator = SUB_OPERATOR else
                        '0';
 
     g_NBit_ALUAdder: entity work.addersubtractor_N
@@ -98,10 +97,10 @@ begin
     -- Barrel Shifter
     ------------------------------------------------------
 
-    s_IsArithmetic <= '0' when i_Operator = ALU_SLL or i_Operator = ALU_SRL else
+    s_IsArithmetic <= '0' when i_Operator = SLL_OPERATOR or i_Operator = SRL_OPERATOR else
                       '1';
 
-    s_IsRight <= '1' when i_Operator = ALU_SRL or i_Operator = ALU_SRA else
+    s_IsRight <= '1' when i_Operator = SRL_OPERATOR or i_Operator = SRA_OPERATOR else
                 '0';
 
     g_BarrelShifter: barrel_shifter
@@ -119,10 +118,10 @@ begin
     ------------------------------------------------------
 
     s_IsLessUnsigned <= 32x"1" when (unsigned(i_A) < unsigned(i_B)) else
-               32x"0";
+                        32x"0";
         
     s_IsLessSigned <= 32x"1" when (signed(i_A) < signed(i_B)) else
-              32x"0";
+                      32x"0";
 
     
     ------------------------------------------------------
@@ -131,22 +130,22 @@ begin
         
     with i_Operator select 
         o_F <= 
-            s_AdderSubtractorOut when ALU_ADD,
-            s_AdderSubtractorOut when ALU_SUB,
-            s_ANDOut             when ALU_AND,
-            s_OROut              when ALU_OR,
-            s_XOROut             when ALU_XOR,
-            s_BarrelShifterOut   when ALU_SLL,
-            s_BarrelShifterOut   when ALU_SRL,
-            s_BarrelShifterOut   when ALU_SRA,
-            s_IsLessSigned       when ALU_SLT,
-            s_IsLessUnsigned     when ALU_SLTU,
+            s_AdderSubtractorOut when ADD_OPERATOR,
+            s_AdderSubtractorOut when SUB_OPERATOR,
+            s_ANDOut             when AND_OPERATOR,
+            s_OROut              when OR_OPERATOR,
+            s_XOROut             when XOR_OPERATOR,
+            s_BarrelShifterOut   when SLL_OPERATOR,
+            s_BarrelShifterOut   when SRL_OPERATOR,
+            s_BarrelShifterOut   when SRA_OPERATOR,
+            s_IsLessSigned       when SLT_OPERATOR,
+            s_IsLessUnsigned     when SLTU_OPERATOR,
             (others => '0')      when others;
 
     with i_Operator select 
         o_Carry <=
-            s_CarryOut when ALU_ADD,
-            s_CarryOut when ALU_SUB,
+            s_CarryOut when ADD_OPERATOR,
+            s_CarryOut when SUB_OPERATOR,
             '0'        when others;
 
 end implementation;

@@ -1,135 +1,124 @@
--------------------------------------------------------------------------
--- Connor Link
--- Iowa State University
--------------------------------------------------------------------------
-
--------------------------------------------------------------------------
--- tb_adder_N.vhd
--- DESCRIPTION: This file contains a testbench to verify the adder_N.vhd module.
--------------------------------------------------------------------------
-
+-- Horizon: tb_adder_N.vhd
+-- (c) 2026 Connor J. Link. All rights reserved.
 library IEEE;
 use IEEE.std_logic_1164.all;
-use IEEE.std_logic_textio.all;  -- For logic types I/O
+use IEEE.std_logic_textio.all;
 library std;
-use std.env.all;                -- For hierarchical/external signals
-use std.textio.all;             -- For basic I/O
+use std.env.all;
+use std.textio.all;
 
 entity tb_adder_N is
-	generic(gCLK_HPER  : time := 10 ns;
-     	    DATA_WIDTH : integer := 32);
+    generic(
+        CLOCK_HALF_PERIOD : time := 10 ns;
+        DATA_WIDTH        : integer := 32
+    );
 end tb_adder_N;
 
-architecture mixed of tb_adder_N is
+architecture implementation of tb_adder_N is
 
--- Total clock period
-constant cCLK_PER : time := gCLK_HPER * 2;
+constant CLOCK_PERIOD : time := CLOCK_HALF_PERIOD * 2;
 
--- Element under test
-component adder_N is
-    generic(N : integer := 32);
-    port(i_A  : in  std_logic_vector(N-1 downto 0);
-         i_B  : in  std_logic_vector(N-1 downto 0);
-         i_Ci : in  std_logic;
-         o_S  : out std_logic_vector(N-1 downto 0);
-         o_Co : out std_logic);
-end component;
+-- Testbench signals
+signal s_Clock, s_Reset : std_logic := '0';
 
--- Create helper signals
-signal CLK, reset : std_logic := '0';
-
--- Create input and output signals for the module under test
-signal s_iA  : std_logic_vector(DATA_WIDTH-1 downto 0) := x"00000000";
-signal s_iB  : std_logic_vector(DATA_WIDTH-1 downto 0) := x"00000000";
-signal s_iCi : std_logic := '0';
-signal s_oS  : std_logic_vector(DATA_WIDTH-1 downto 0);
-signal s_oCo : std_logic;
+-- Stimulus signals
+signal s_iA     : std_logic_vector(DATA_WIDTH-1 downto 0) := x"00000000";
+signal s_iB     : std_logic_vector(DATA_WIDTH-1 downto 0) := x"00000000";
+signal s_iCarry : std_logic := '0';
+signal s_oS     : std_logic_vector(DATA_WIDTH-1 downto 0);
+signal s_oCarry : std_logic;
 
 begin
 
--- Instantiate the module under test
-DUT0: adder_N
-    generic map(N => DATA_WIDTH)
-	port map(i_A  => s_iA,
- 		     i_B  => s_iB,
-		     i_Ci => s_iCi,
-		     o_S  => s_oS,
-             o_Co => s_oCo);
+	-- Design-under-test instantiation
+	DUT0: entity work.adder_N
+	    generic map(
+			N => DATA_WIDTH
+		)
+	    port map(
+			i_A     => s_iA,
+	        i_B     => s_iB,
+	        i_Carry => s_iCarry,
+	        o_S     => s_oS,
+	        o_Carry => s_oCarry
+		);
 
 
---This first process is to setup the clock for the test bench
-P_CLK: process
-begin
-	CLK <= '1';         -- clock starts at 1
-	wait for gCLK_HPER; -- after half a cycle
-	CLK <= '0';         -- clock becomes a 0 (negative edge)
-	wait for gCLK_HPER; -- after half a cycle, process begins evaluation again
-end process;
+	p_Clock: process
+	begin
+	    CLK <= '1';
+	    wait for CLOCK_HALF_PERIOD;
+	    CLK <= '0';
+	    wait for CLOCK_HALF_PERIOD;
+	end process;
 
--- This process resets the sequential components of the design.
--- It is held to be 1 across both the negative and positive edges of the clock
--- so it works regardless of whether the design uses synchronous (pos or neg edge)
--- or asynchronous resets.
-P_RST: process
-begin
-	reset <= '0';   
-	wait for gCLK_HPER/2;
-	reset <= '1';
-	wait for gCLK_HPER*2;
-	reset <= '0';
-	wait;
-end process;  
+	p_Reset: process
+	begin
+	    reset <= '0';   
+	    wait for CLOCK_HALF_PERIOD / 2;
+	    reset <= '1';
+	    wait for CLOCK_HALF_PERIOD * 2;
+	    reset <= '0';
+	    wait;
+	end process;  
 
 
--- Assign inputs 
-P_TEST_CASES: process
-begin
-	wait for gCLK_HPER;
-	wait for gCLK_HPER/2; -- don't change inputs on clock edges
+	p_Stimulus: process
+	begin
+		-- Await reset and stabilization; trigger off-edge
+	    wait for CLOCK_HALF_PERIOD;
+	    wait for CLOCK_HALF_PERIOD / 2; 
 
-	-- Test Case 1:
-	s_iA  <= x"00000000";
-	s_iB  <= x"00000000";
-	s_iCi <= '0';
-	wait for gCLK_HPER*2;
-	-- Expect: s_oS to be $00, s_oCo to be 0
+	    s_iA  <= x"00000000";
+	    s_iB  <= x"00000000";
+	    s_iCarry <= '0';
+	    wait for CLOCK_PERIOD;
+		assert (s_oS = x"00000000" and s_oCarry = '0')
+			report "tb_adder_N: testcase 1 failed (expected S=0x00000000, Carry=0)"
+			severity error;
 
-    -- Test Case 2:
-	s_iA  <= x"00000005";
-	s_iB  <= x"00000007";
-	s_iCi <= '0';
-	wait for gCLK_HPER*2;
-	-- Expect: s_oS to be $0C, s_oCo to be 0
+	    s_iA  <= x"00000005";
+	    s_iB  <= x"00000007";
+	    s_iCarry <= '0';
+	    wait for CLOCK_PERIOD;
+        assert (s_oS = x"0000000C" and s_oCarry = '0')
+            report "tb_adder_N: testcase 2 failed (expected S=0x0000000C, Carry=0)"
+            severity error;
 
-    -- Test Case 3:
-	s_iA  <= x"000000FE";
-	s_iB  <= x"00000001";
-	s_iCi <= '1';
-	wait for gCLK_HPER*2;
-	-- Expect: s_oS to be $100, s_oCo to be 0
+	    s_iA  <= x"000000FE";
+	    s_iB  <= x"00000001";
+	    s_iCarry <= '1';
+	    wait for CLOCK_PERIOD;
+        assert (s_oS = x"00000100" and s_oCarry = '0')
+            report "tb_adder_N: testcase 3 failed (expected S=0x00000100, Carry=0)"
+            severity error;
 
-    -- Test Case 4:
-	s_iA  <= x"000000FE";
-	s_iB  <= x"00000001";
-	s_iCi <= '0';
-	wait for gCLK_HPER*2;
-	-- Expect: s_oS to be $FF, s_oCo to be 0
+	    s_iA  <= x"000000FE";
+	    s_iB  <= x"00000001";
+	    s_iCarry <= '0';
+	    wait for CLOCK_PERIOD;
+        assert (s_oS = x"000000FF" and s_oCarry = '0')
+            report "tb_adder_N: testcase 4 failed (expected S=0x000000FF, Carry=0)"
+            severity error;
 
-    -- Test Case 5:
-	s_iA  <= x"FFFFFFFE";
-	s_iB  <= x"00000001";
-	s_iCi <= '1';
-	wait for gCLK_HPER*2;
-	-- Expect: s_oS to be $00000000, s_oCo to be 1
+	    s_iA  <= x"FFFFFFFE";
+	    s_iB  <= x"00000001";
+	    s_iCarry <= '1';
+	    wait for CLOCK_PERIOD;
+        assert (s_oS = x"00000000" and s_oCarry = '1')
+            report "tb_adder_N: testcase 5 failed (expected S=0x00000000, Carry=1)"
+            severity error;
 
-    -- Test Case 6:
-	s_iA  <= x"FFFFFFFE";
-	s_iB  <= x"00000001";
-	s_iCi <= '0';
-	wait for gCLK_HPER*2;
-	-- Expect: s_oS to be $FFFFFFFF, s_oCo to be 0
+	    s_iA  <= x"FFFFFFFE";
+	    s_iB  <= x"00000001";
+	    s_iCarry <= '0';
+	    wait for CLOCK_PERIOD;
+        assert (s_oS = x"FFFFFFFF" and s_oCarry = '0')
+            report "tb_adder_N: testcase 6 failed (expected S=0xFFFFFFFF, Carry=0)"
+            severity error;
 
-	wait;
-end process;
+	    stop;
 
-end mixed;
+	end process;
+
+end implementation;

@@ -3,8 +3,6 @@
 
 library IEEE;
 use IEEE.std_logic_1164.all;
-library work;
-use work.adder_1.all;
 
 entity adder_N is
     generic(

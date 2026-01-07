@@ -18,7 +18,7 @@ architecture implementation of not_N is
 begin
 
     g_Nbit_Not: for i in 0 to N-1 generate
-        NOTI: invg 
+        NOTI: entity work.not_1 
             port map(
                 i_S => i_S(i),
                 o_F => o_F(i)

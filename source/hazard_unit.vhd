@@ -1,12 +1,6 @@
--------------------------------------------------------------------------
--- Connor Link
--- Iowa State University
--------------------------------------------------------------------------
+-- Horizon: hazard_unit.vhd
+-- (c) 2026 Connor J. Link. All rights reserved.
 
--------------------------------------------------------------------------
--- hmu.vhd
--- DESCRIPTION: This file contains an implementation of a basic RISC-V hazard management unit.
--------------------------------------------------------------------------
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -14,7 +8,7 @@ use IEEE.numeric_std.all;
 library work;
 use work.types.all;
 
-entity hmu is
+entity hazard_unit is
     port(
         i_IFID_RS1       : in  std_logic_vector(4 downto 0);
         i_IFID_RS2       : in  std_logic_vector(4 downto 0);
@@ -41,7 +35,6 @@ entity hmu is
         i_IDEX_IsBranch  : in  std_logic;
         i_MEMWB_IsBranch : in  std_logic;
 
-
         o_Break          : out std_logic;
 
         o_IFID_Flush     : out std_logic;
@@ -53,10 +46,9 @@ entity hmu is
         o_EXMEM_Flush    : out std_logic;
         o_EXMEM_Stall    : out std_logic
     );
-end hmu;
+end hazard_unit;
 
-architecture mixed of hmu is
-
+architecture implementation of hazard_unit is
 begin
     
     process(
@@ -195,7 +187,6 @@ begin
 
         end if;
 
-
         o_Break       <= v_IP_Stall;
         o_IFID_Flush  <= v_IFID_Flush;
         o_IFID_Stall  <= v_IFID_Stall;
@@ -206,4 +197,4 @@ begin
 
     end process;
 
-end mixed;
+end implementation;

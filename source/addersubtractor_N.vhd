@@ -3,10 +3,6 @@
 
 library IEEE;
 use IEEE.std_logic_1164.all;
-library work;
-use work.adder_N.all;
-use work.multiplexer_2to1_N.all;
-use work.not_N.all;
 
 entity addersubtractor_N is
     generic(
@@ -21,7 +17,7 @@ entity addersubtractor_N is
     );
 end addersubtractor_N;
 
-architecture implementation of addsub_N is
+architecture implementation of addersubtractor_N is
 
 signal s_Bi : std_logic_vector(N-1 downto 0);
 signal s_Bm : std_logic_vector(N-1 downto 0);
@@ -33,7 +29,7 @@ begin
             N => N
         )
         port map(
-            i_A => i_B,
+            i_S => i_B,
             o_F => s_Bi
         );
 

@@ -3,8 +3,6 @@
 
 library IEEE;
 use IEEE.std_logic_1164.all;
-library work;
-use work.multiplexer_2to1.all;
 
 entity barrel_shifter is
     port(

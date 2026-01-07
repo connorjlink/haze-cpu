@@ -21,27 +21,18 @@ end register_EX;
 architecture implementation of register_EX is
 begin
 
-    process(
-        all
-    )
-    begin
-        -- insert a NOP
-        if i_Reset = '1' then
-            o_Signals <= EX_NOP;
-
-        elsif rising_edge(i_Clock) then
-            
-            -- insert a NOP
-            if i_Flush = '1' then
-                o_Signals <= EX_NOP;
-
-            elsif i_Stall = '0' then
-                o_Signals <= i_Signals;
-
-            end if;
-
-        end if;
-
-    end process;
+    g_PipelineRegister: entity work.pipeline_register
+        generic map(
+            T   => EX_record_t,
+            NOP => EX_NOP
+        )
+        port map(
+            i_Clock   => i_Clock,
+            i_Reset   => i_Reset,
+            i_Stall   => i_Stall,
+            i_Flush   => i_Flush,
+            i_Signals  => i_Signals,
+            o_Signals => o_Signals
+        );
 
 end implementation;

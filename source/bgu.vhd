@@ -16,7 +16,7 @@ use work.types.all;
 
 entity bgu is
     port(
-        i_Clock            : in  std_logic;
+        i_Clock          : in  std_logic;
         i_DS1            : in  std_logic_vector(31 downto 0);
         i_DS2            : in  std_logic_vector(31 downto 0);
         i_BGUOp          : in  natural;
@@ -91,7 +91,6 @@ begin
 
         end case;
 
-        -- TODO: "Predict" unconditional branches as always taken -- should save one cycle
         -- TODO: predict conditional forward branch not taken (used for `if` conditions), backward branch taken (used for loops) -- should save about .5 cycles per branch I estimate
 
         o_BranchTaken    <= v_BranchTaken;

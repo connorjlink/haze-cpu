@@ -3,7 +3,6 @@
 
 library IEEE;
 use IEEE.std_logic_1164.all;
-use work.multiplexer_2to1.all;
 
 entity multiplexer_2to1_N is
     generic(
@@ -28,6 +27,6 @@ begin
                 i_D1 => i_D1(i),
                 o_O  => o_O(i)
             );
-    end generate G_NBit_MUX;
+    end generate g_NBit_MUX;
   
 end implementation;

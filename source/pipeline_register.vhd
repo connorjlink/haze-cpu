@@ -10,12 +10,12 @@ entity pipeline_register is
         NOP : T
     );
     port (
-        i_Clock : in  std_logic;
-        i_Reset : in  std_logic;
-        i_Stall : in  std_logic;
-        i_Flush : in  std_logic;
-        i_Data  : in  T;
-        o_Data  : out T
+        i_Clock   : in  std_logic;
+        i_Reset   : in  std_logic;
+        i_Stall   : in  std_logic;
+        i_Flush   : in  std_logic;
+        i_Signals : in  T;
+        o_Signals : out T
     );
 end entity;
 
@@ -27,15 +27,17 @@ begin
     begin
         -- insert a NOP
         if i_Reset = '1' then
-            o_Data <= NOP;
+            o_Signals <= NOP;
 
         -- insert a NOP
         elsif rising_edge(i_Clock) then
             if i_Flush = '1' then
-                o_Data <= NOP;    
+                o_Signals <= NOP;    
             
-            elsif i_Stall = '0' then
-                o_Data <= i_Data; 
+        -- register contents
+        elsif i_Stall = '0' then
+            o_Signals <= i_Signals; 
+        
         end if;
 
       end if;
