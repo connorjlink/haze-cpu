@@ -82,13 +82,13 @@ type forwarding_path_t is (
 -- Instruction Fetch -> Control Unit
 ------------------------------------------------------
 
-type instruction_record_t is record
+type IF_record_t is record
     InstructionAddress : std_logic_vector(31 downto 0);
     LinkAddress        : std_logic_vector(31 downto 0);
     Instruction        : std_logic_vector(31 downto 0);
-end record instruction_record_t;
+end record IF_record_t;
 
-constant INSTRUCTION_NOP : instruction_record_t := (
+constant IF_NOP : IF_record_t := (
     InstructionAddress => (others => '0'),
     LinkAddress        => (others => '0'),
     Instruction        => 32x"00000013"
@@ -103,7 +103,7 @@ constant INSTRUCTION_NOP : instruction_record_t := (
 
 -- NOTE: Control unit is the first cause of exceptions: illegal instructions.
 
-type driver_record_t is record
+type ID_record_t is record
     MemoryWriteEnable   : std_logic;
     RegisterWriteEnable : std_logic;
     RegisterSource      : natural;
@@ -124,13 +124,13 @@ type driver_record_t is record
     IsSignExtend        : std_logic; -- 0: zero-extend, 1: sign-extend
     IPToALU             : std_logic;
     Data                : std_logic_vector(31 downto 0);
-end record driver_record_t;
+end record ID_record_t;
 
-constant DRIVER_NOP : driver_record_t := (
+constant ID_NOP : ID_record_t := (
     MemoryWriteEnable   => '0',
     RegisterWriteEnable => '0',
     RegisterSource      => 0,
-    ALUSource           => work.types.ALUSRC_REG,
+    ALUSource           => ALUSOURCE_REGISTER,
     ALUOperator         => 0,
     BGUOperator         => 0,
     MemoryWidth         => 0,
@@ -156,12 +156,12 @@ constant DRIVER_NOP : driver_record_t := (
 -- Arithmetic Logic Unit -> Memory
 ------------------------------------------------------
 
-type alu_record_t is record
+type EX_record_t is record
     Result   : std_logic_vector(31 downto 0);
     CarryOut : std_logic;
-end record alu_record_t;
+end record EX_record_t;
 
-constant ALU_NOP : alu_record_t := (
+constant EX_NOP : EX_record_t := (
     Result   => (others => '0'),
     CarryOut => '0'
 );
@@ -173,11 +173,11 @@ constant ALU_NOP : alu_record_t := (
 -- Memory -> Register File
 ------------------------------------------------------
 
-type memory_record_t is record
+type MEM_record_t is record
     Data : std_logic_vector(31 downto 0);
-end record memory_record_t;
+end record MEM_record_t;
 
-constant MEMORY_NOP : memory_record_t := (
+constant MEM_NOP : MEM_record_t := (
     Data => (others => '0')
 );
 
@@ -188,14 +188,14 @@ constant MEMORY_NOP : memory_record_t := (
 -- Register File -> x (delay circuit)
 ------------------------------------------------------
 
-type register_record_t is record
+type WB_record_t is record
     Result      : std_logic_vector(31 downto 0); -- MEMWB ALU result delayed
     Data        : std_logic_vector(31 downto 0); -- MEMWB MemData delayed
     Forward     : natural;                       -- ForwardedMemData delayed
     MemoryWidth : natural;
-end record register_record_t;
+end record WB_record_t;
 
-constant REGISTER_NOP : register_record_t := (
+constant WB_NOP : WB_record_t := (
     Result       => (others => '0'),
     Data         => (others => '0'),
     Forward      => 0,
