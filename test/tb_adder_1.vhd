@@ -3,10 +3,10 @@
 
 library IEEE;
 use IEEE.std_logic_1164.all;
-use IEEE.std_logic_textio.all;  -- For logic types I/O
+use IEEE.std_logic_textio.all;
 library std;
-use std.env.all;                -- For hierarchical/external signals
-use std.textio.all;             -- For basic I/O
+use std.env.all;
+use std.textio.all;
 
 entity tb_adder_1 is
     generic(
@@ -17,17 +17,17 @@ end tb_adder_1;
 
 architecture implementation of tb_adder_1 is
 
-	constant CLOCK_PERIOD : time := CLOCK_HALF_PERIOD * 2;
+constant CLOCK_PERIOD : time := CLOCK_HALF_PERIOD * 2;
 
-	-- Testbench signals
-	signal s_Clock, s_Reset : std_logic := '0';
+-- Testbench signals
+signal s_Clock, s_Reset : std_logic := '0';
 
-	-- Stimulus signals
-	signal s_iA     : std_logic := '0';
-	signal s_iB     : std_logic := '0';
-	signal s_iCarry : std_logic := '0';
-	signal s_oS     : std_logic;
-	signal s_oCarry : std_logic;
+-- Stimulus signals
+signal s_iA     : std_logic := '0';
+signal s_iB     : std_logic := '0';
+signal s_iCarry : std_logic := '0';
+signal s_oS     : std_logic;
+signal s_oCarry : std_logic;
 
 begin
 
