@@ -39,8 +39,8 @@ begin
     -- Local and global write enable masking
     s_WEm <= s_WEx and 32x"FFFFFFFF" when i_WriteEnable = '1' else 32x"0";
 
-    g_Registers: for i in 1 to 31 generate
-        REGISTERI: register_N
+    g_NRegisters: for i in 1 to 31 generate
+        REGISTERI: entity work.register_N
             generic map(
                 N => 32
             )
@@ -51,7 +51,7 @@ begin
                 i_D           => i_D,
                 o_Q           => s_Rx(i)
             );
-    end generate g_Registers;
+    end generate g_NRegisters;
 
     -- Hardwired zero register assignment
     s_Rx(0) <= x"00000000";

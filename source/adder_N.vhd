@@ -32,9 +32,10 @@ begin
     generate
         ADDERI: entity work.adder_1
             port map(
-                i_B => i_B(i),
+                i_A     => i_A(i),
+                i_B     => i_B(i),
                 i_Carry => s_C(i),
-                o_S => o_S(i),
+                o_S     => o_S(i),
                 o_Carry => s_C(i + 1)
             );
     end generate g_NBit_Adder;

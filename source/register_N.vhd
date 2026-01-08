@@ -3,7 +3,6 @@
 
 library IEEE;
 use IEEE.std_logic_1164.all;
-use work.register_1.all;
 
 entity register_N is
     generic(
@@ -24,7 +23,7 @@ begin
 
     g_NBit_Register: for i in 0 to N-1
     generate
-        REGISTERI: work.register_1 
+        REGISTERI: entity work.register_1 
             port map(
                 i_Clock       => i_Clock,
                 i_Reset       => i_Reset,

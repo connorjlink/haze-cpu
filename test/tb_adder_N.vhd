@@ -46,19 +46,19 @@ begin
 
 	p_Clock: process
 	begin
-	    CLK <= '1';
+	    s_Clock <= '1';
 	    wait for CLOCK_HALF_PERIOD;
-	    CLK <= '0';
+	    s_Clock <= '0';
 	    wait for CLOCK_HALF_PERIOD;
 	end process;
 
 	p_Reset: process
 	begin
-	    reset <= '0';   
+	    s_Reset <= '0';   
 	    wait for CLOCK_HALF_PERIOD / 2;
-	    reset <= '1';
+	    s_Reset <= '1';
 	    wait for CLOCK_HALF_PERIOD * 2;
-	    reset <= '0';
+	    s_Reset <= '0';
 	    wait;
 	end process;  
 

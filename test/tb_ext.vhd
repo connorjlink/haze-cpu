@@ -30,7 +30,7 @@ component ext is
     generic(IN_WIDTH  : integer := 12;
             OUT_WIDTH : integer := 32);
 	port(i_D          : in  std_logic_vector(IN_WIDTH-1 downto 0);
-         i_nZero_Sign : in  std_logic;
+         i_IsSignExtend : in  std_logic;
          o_Q          : out std_logic_vector(OUT_WIDTH-1 downto 0));
 end component;
 
@@ -47,7 +47,7 @@ begin
 -- Instantiate the module under test
 DUT0: ext
 	port map(i_D          => s_iD,
-             i_nZero_Sign => s_inZero_Sign,
+             i_IsSignExtend => s_inZero_Sign,
              o_Q          => s_oQ);
 
 

@@ -51,7 +51,7 @@ begin
         port map(
             i_A     => i_A,
             i_B     => s_Bm,
-            i_Ci    => i_IsSubtraction,
+            i_Carry => i_IsSubtraction,
             o_S     => o_S,
             o_Carry => o_Carry
         );

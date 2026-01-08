@@ -40,34 +40,34 @@ begin
 
     -- Upcounting disabled when pipeline stall needed only
     s_IPWriteEnable <= '1' when i_Load  = '1' else
-                 '0' when i_Stall = '1' else
-                 '1';
+                       '0' when i_Stall = '1' else
+                       '1';
 
-    g_InstructionPointer: register_N
+    g_InstructionPointer: entity work.register_N
         generic map(
             N => 32
         )
         port map(
-            i_Clock => i_Clock,
-            i_Reset => '0', -- NOTE: not asynchronous! but I kinda need to reset synchronously because I want to be able to choose the reset address.
-            i_WE  => s_IPWriteEnable,
-            i_D   => s_IPData,
-            o_Q   => s_IPAddress
+            i_Clock       => i_Clock,
+            i_Reset       => '0', -- NOTE: not asynchronous! but I kinda need to reset synchronously because I want to be able to choose the reset address.
+            i_WriteEnable => s_IPWriteEnable,
+            i_D           => s_IPData,
+            o_Q           => s_IPAddress
         );
 
     s_IPStride <= 32x"2" when i_Stride = '0' else
                   32x"4";
 
-    g_Upcounter: adder_N
+    g_Upcounter: entity work.adder_N
         generic map(
             N => 32
         )
         port map(
-            i_A  => s_IPAddress,
-            i_B  => s_IPStride,
-            i_Ci => '0',
-            o_S  => s_LinkAddress,
-            o_Co => open
+            i_A     => s_IPAddress,
+            i_B     => s_IPStride,
+            i_Carry => '0',
+            o_S     => s_LinkAddress,
+            o_Carry => open
         );
 
     o_Address     <= s_IPAddress;

@@ -20,7 +20,7 @@ architecture implementation of multiplexer_2to1_N is
 begin
 
     g_NBit_MUX: for i in 0 to N-1 generate
-        MUXI: work.multiplexer_2to1 
+        MUXI: entity work.multiplexer_2to1 
             port map(
                 i_S  => i_S,
                 i_D0 => i_D0(i),

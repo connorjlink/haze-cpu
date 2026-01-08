@@ -14,7 +14,7 @@ entity arithmetic_logic_unit is
     port(
         i_A        : in  std_logic_vector(31 downto 0);
         i_B        : in  std_logic_vector(31 downto 0);
-        i_Operator : in  natural;
+        i_Operator : in  alu_operator_t;
         o_F        : out std_logic_vector(31 downto 0);
         o_Carry    : out std_logic
     );
@@ -27,8 +27,8 @@ signal s_XOROut : std_logic_vector(N-1 downto 0) := (others => '0');
 signal s_OROut  : std_logic_vector(N-1 downto 0) := (others => '0');
 signal s_ANDOut : std_logic_vector(N-1 downto 0) := (others => '0');
 
-signal s_IsLessSigned   : std_logic := '0';
-signal s_IsLessUnsigned : std_logic := '0';
+signal s_IsLessSigned   : std_logic_vector(N-1 downto 0) := (others => '0');
+signal s_IsLessUnsigned : std_logic_vector(N-1 downto 0) := (others => '0');
 
 signal s_IsArithmetic     : std_logic := '0';
 signal s_IsRight          : std_logic := '0';
@@ -103,7 +103,7 @@ begin
     s_IsRight <= '1' when i_Operator = SRL_OPERATOR or i_Operator = SRA_OPERATOR else
                 '0';
 
-    g_BarrelShifter: barrel_shifter
+    g_BarrelShifter: entity work.barrel_shifter
         port map(
             i_A            => i_A,
             i_B            => i_B(4 downto 0), -- log2(32) = 5

@@ -3,9 +3,6 @@
 
 library IEEE;
 use IEEE.std_logic_1164.all;
-use work.xor_2.all;
-use work.and_2.all;
-use work.or_2.all;
 
 entity adder_1 is
     port(

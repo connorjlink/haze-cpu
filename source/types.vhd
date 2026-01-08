@@ -14,7 +14,7 @@ constant ADDR_WIDTH : natural := 10;
 type array_t is array (natural range <>) of std_logic_vector(31 downto 0);
 
 -- Corresponding func3 values for each branch type
-type branch_type_t is (
+type branch_operator_t is (
     BEQ_TYPE,
     BNE_TYPE,
     BLT_TYPE,

@@ -19,7 +19,7 @@ entity bgu is
         i_Clock          : in  std_logic;
         i_DS1            : in  std_logic_vector(31 downto 0);
         i_DS2            : in  std_logic_vector(31 downto 0);
-        i_BGUOp          : in  natural;
+        i_BranchOperator     : in  branch_operator_t;
         o_BranchTaken    : out std_logic;
         o_BranchNotTaken : out std_logic
         -- TODO: prediction results here
@@ -41,50 +41,53 @@ begin
         v_BranchTaken    := '0';
         v_BranchNotTaken := '0';
 
-        case i_BGUOp is
-            when work.types.BEQ =>
+        case i_BranchOperator is
+            when BEQ_TYPE =>
                 if unsigned(i_DS1) = unsigned(i_DS2) then
                     v_BranchTaken := '1';
                 else
                     v_BranchNotTaken := '1';
                 end if;
 
-            when work.types.BNE =>
+            when BNE_TYPE =>
                 if unsigned(i_DS1) /= unsigned(i_DS2) then
                     v_BranchTaken := '1';
                 else
                     v_BranchNotTaken := '1';
                 end if;
 
-            when work.types.BLT =>
+            when BLT_TYPE =>
                 if signed(i_DS1) < signed(i_DS2) then
                     v_BranchTaken := '1';
                 else
                     v_BranchNotTaken := '1';
                 end if;
 
-            when work.types.BGE =>
+            when BGE_TYPE =>
                 if signed(i_DS1) >= signed(i_DS2) then
                     v_BranchTaken := '1';
                 else
                     v_BranchNotTaken := '1';
                 end if;
 
-            when work.types.BLTU =>
+            when BLTU_TYPE =>
                 if unsigned(i_DS1) < unsigned(i_DS2) then
                     v_BranchTaken := '1';
                 else
                     v_BranchNotTaken := '1';
                 end if;
 
-            when work.types.BGEU =>
+            when BGEU_TYPE =>
                 if unsigned(i_DS1) >= unsigned(i_DS2) then
                     v_BranchTaken := '1';
                 else
                     v_BranchNotTaken := '1';
                 end if;
 
-            when work.types.J =>
+            when JAL_TYPE =>
+                v_BranchTaken := '1';
+
+            when JALR_TYPE =>
                 v_BranchTaken := '1';
 
             when others =>

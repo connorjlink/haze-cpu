@@ -13,9 +13,9 @@ entity extender_NtoM is
         M : integer := work.types.DATA_WIDTH
     ); 
     port(
-        i_D             : in  std_logic_vector(N-1 downto 0);
-        i_ExtensionType : in  std_logic; -- 0: zero-extend, 1: sign-extend
-        o_Q             : out std_logic_vector(M-1 downto 0)
+        i_D            : in  std_logic_vector(N-1 downto 0);
+        i_IsSignExtend : in  std_logic; -- 0: zero-extend, 1: sign-extend
+        o_Q            : out std_logic_vector(M-1 downto 0)
     );
 end extender_NtoM;
 
@@ -29,6 +29,6 @@ begin
     s_Rz <= std_logic_vector(resize(unsigned(i_D), M));
     s_Rs <= std_logic_vector(resize(signed(i_D), M));
 
-    o_Q  <= s_Rz when i_ExtensionType = '0' else s_Rs;
+    o_Q  <= s_Rz when i_IsSignExtend = '0' else s_Rs;
 
 end implementation;
