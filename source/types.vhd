@@ -15,6 +15,7 @@ type array_t is array (natural range <>) of std_logic_vector(31 downto 0);
 
 -- Corresponding func3 values for each branch type
 type branch_operator_t is (
+    BRANCH_NONE,
     BEQ_TYPE,
     BNE_TYPE,
     BLT_TYPE,
@@ -64,6 +65,7 @@ type rf_source_t is (
 
 -- Corresponding to each branch mode type (for correct effective address calculation)
 type branch_mode_t is (
+    BRANCHMODE_NONE,
     BRANCHMODE_JAL_OR_BCC,
     BRANCHMODE_JALR
 );
@@ -104,8 +106,8 @@ constant IF_NOP : IF_record_t := (
 -- NOTE: Control unit is the first cause of exceptions: illegal instructions.
 
 type ID_record_t is record
-    MemoryWriteEnable   : std_logic;
-    RegisterWriteEnable : std_logic;
+    MemoryWriteEnableEnable   : std_logic;
+    RegisterWriteEnableEnable : std_logic;
     RegisterSource      : natural;
     ALUSource           : alu_source_t;
     ALUOperator         : natural;
@@ -120,15 +122,15 @@ type ID_record_t is record
     IsFaulted           : std_logic;
     BranchMode          : natural;
     IsBranch            : std_logic;
-    IPStride            : std_logic; -- 0: 2 bytes, 1: 4 bytes
+    IsStride4            : std_logic; -- 0: 2 bytes, 1: 4 bytes
     IsSignExtend        : std_logic; -- 0: zero-extend, 1: sign-extend
     IPToALU             : std_logic;
     Data                : std_logic_vector(31 downto 0);
 end record ID_record_t;
 
 constant ID_NOP : ID_record_t := (
-    MemoryWriteEnable   => '0',
-    RegisterWriteEnable => '0',
+    MemoryWriteEnableEnable   => '0',
+    RegisterWriteEnableEnable => '0',
     RegisterSource      => 0,
     ALUSource           => ALUSOURCE_REGISTER,
     ALUOperator         => 0,
@@ -143,7 +145,7 @@ constant ID_NOP : ID_record_t := (
     IsFaulted           => '0',
     BranchMode          => 0,
     IsBranch            => '0',
-    IPStride            => '0',
+    IsStride4            => '0',
     IsSignExtend        => '0',
     IPToALU             => '0',
     Data                => (others => '0')

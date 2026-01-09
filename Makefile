@@ -29,7 +29,7 @@ SOURCE := \
 	./source/multiplier.vhd
 
 .PHONY: setup verify tests \
-	test_barrel_shifter test_adder_1 test_adder_N test_addersubtractor_N test_arithmetic_logic_unit test_branch_unit test_not_N test_decoder_5to32 test_instruction_decoder test_register_1 test_register_N test_memory test_extender test_instruction_pointer test_multiplexer_32to1 test_multiplexer_2to1_N test_multiplexer_2to1 test_multiplier test_register_file
+	test_barrel_shifter test_adder_1 test_adder_N test_addersubtractor_N test_arithmetic_logic_unit test_branch_unit test_not_N test_decoder_5to32 test_instruction_decoder test_register_1 test_register_N test_memory test_extender test_instruction_pointer test_multiplexer_32to1 test_multiplexer_2to1_N test_multiplexer_2to1 test_multiplier test_register_file test_control_unit
 
 # suppress "Entering/Leaving directory"
 # MAKEFLAGS += --no-print-directory
@@ -40,7 +40,7 @@ setup: $(WORK_CF)
 $(WORK_CF): $(SOURCE)
 	$(ANALYZE) $(SOURCE)
 
-tests: test_barrel_shifter test_adder_1 test_adder_N test_addersubtractor_N test_arithmetic_logic_unit test_branch_unit test_not_N test_decoder_5to32 test_instruction_decoder test_register_1 test_register_N test_memory test_extender test_instruction_pointer test_multiplexer_32to1 test_multiplexer_2to1_N test_multiplexer_2to1 test_multiplier test_register_file
+tests: test_barrel_shifter test_adder_1 test_adder_N test_addersubtractor_N test_arithmetic_logic_unit test_branch_unit test_not_N test_decoder_5to32 test_instruction_decoder test_register_1 test_register_N test_memory test_extender test_instruction_pointer test_multiplexer_32to1 test_multiplexer_2to1_N test_multiplexer_2to1 test_multiplier test_register_file test_control_unit
 
 verify: setup tests
 
@@ -119,3 +119,7 @@ test_multiplier: setup ./test/tb_multiplier.vhd
 test_register_file: setup ./test/tb_register_file.vhd
 	$(ANALYZE) ./test/tb_register_file.vhd
 	$(RUN) tb_register_file
+
+test_control_unit: setup ./test/tb_control_unit.vhd
+	$(ANALYZE) ./test/tb_control_unit.vhd
+	$(RUN) tb_control_unit

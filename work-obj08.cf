@@ -1,84 +1,138 @@
 v 4
-file . "./test/tb_adder_N.vhd" "389984f21fad49a3da4bdd2409aa3a95e3d3d598" "20260108061558.097":
-  entity tb_adder_n at 4( 80) + 0 on 1549;
-  architecture implementation of tb_adder_n at 18( 362) + 0 on 1550;
+file . "./test/tb_control_unit.vhd" "57f3b005a9c8347fed1478a4cc352605bfdeb58f" "20260109192651.867":
+  entity tb_control_unit at 4( 85) + 0 on 3138;
+  architecture implementation of tb_control_unit at 20( 402) + 0 on 3139;
+file . "./test/tb_register_file.vhd" "9fbf316c57850b7d9a9b5d490e1fd9893b9feb35" "20260109192651.780":
+  entity tb_register_file at 4( 86) + 0 on 3136;
+  architecture implementation of tb_register_file at 18( 383) + 0 on 3137;
+file . "./test/tb_multiplier.vhd" "9eb0d6ab30d224826f96aef7674311ae435194cd" "20260109192651.693":
+  entity tb_multiplier at 4( 83) + 0 on 3134;
+  architecture implementation of tb_multiplier at 17( 327) + 0 on 3135;
+file . "./test/tb_multiplexer_2to1_N.vhd" "579a7e45fd29016ddacfd2b3daee938a38845f4e" "20260109192651.548":
+  entity tb_multiplexer_2to1_n at 4( 91) + 0 on 3130;
+  architecture implementation of tb_multiplexer_2to1_n at 20( 433) + 0 on 3131;
+file . "./test/tb_multiplexer_32to1.vhd" "5f82cf7d5aa99b1f562d43df1c5386b3bc69aa32" "20260109192651.476":
+  entity tb_multiplexer_32to1 at 4( 90) + 0 on 3128;
+  architecture implementation of tb_multiplexer_32to1 at 20( 431) + 0 on 3129;
+file . "./test/tb_extender_NtoM.vhd" "6085e5fb16733e39c9168be6857c662a276141c5" "20260109192651.327":
+  entity tb_extender_ntom at 4( 86) + 0 on 3124;
+  architecture implementation of tb_extender_ntom at 18( 379) + 0 on 3125;
+file . "./test/tb_memory.vhd" "e567f0be953bf216cbf0ae8daf54fd3e6d0b7f49" "20260109192651.240":
+  entity tb_memory at 4( 79) + 0 on 3122;
+  architecture implementation of tb_memory at 19( 406) + 0 on 3123;
+file . "./test/tb_register_N.vhd" "a803973513d3798cec901851c2f72dcea19023e3" "20260109192651.189":
+  entity tb_register_n at 4( 83) + 0 on 3120;
+  architecture implementation of tb_register_n at 18( 374) + 0 on 3121;
+file . "./test/tb_register_1.vhd" "784724ddeb4f2a8a3976ae2f73c153590f8e3674" "20260109192651.140":
+  entity tb_register_1 at 4( 83) + 0 on 3118;
+  architecture implementation of tb_register_1 at 17( 327) + 0 on 3119;
+file . "./test/tb_instruction_decoder.vhd" "2e47d621297a049027b54167b0b791bcc791293e" "20260109192651.069":
+  entity tb_instruction_decoder at 4( 92) + 0 on 3116;
+  architecture implementation of tb_instruction_decoder at 18( 401) + 0 on 3117;
+file . "./test/tb_not_N.vhd" "f7105d6831dbd1191e9872abfd9e464b7074e5c9" "20260109192650.960":
+  entity tb_not_n at 4( 78) + 0 on 3112;
+  architecture implementation of tb_not_n at 20( 395) + 0 on 3113;
+file . "./test/tb_adder_N.vhd" "446bd39ac800f728890dab56da7e486e5c10b3ff" "20260109192650.689":
+  entity tb_adder_n at 4( 80) + 0 on 3104;
+  architecture implementation of tb_adder_n at 18( 365) + 0 on 3105;
 file . "./source/bgu.vhd" "9feaf0393aecd04e6917dae98fa90b3a393920ba" "20260108053646.481":
   entity bgu at 11( 454) + 0 on 1319;
   architecture mixed of bgu at 29( 961) + 0 on 1320;
-file . "./source/memory.vhd" "b46d7cd626ec3206298762f0deaa140d8d932fd1" "20260108061557.776":
-  entity memory at 4( 76) + 0 on 1529;
-  architecture implementation of memory at 22( 569) + 0 on 1530;
-file . "./source/register_N.vhd" "9098d76e62378090d134e04c8ed5f64afc85b64e" "20260108061557.566":
-  entity register_n at 4( 80) + 0 on 1511;
-  architecture implementation of register_n at 20( 478) + 0 on 1512;
-file . "./source/register_1.vhd" "21ad0a7da9c0f0dc4d12e199bd974ebc519e5acf" "20260108061557.566":
-  entity register_1 at 4( 80) + 0 on 1509;
-  architecture implementation of register_1 at 17( 386) + 0 on 1510;
-file . "./source/instruction_decoder.vhd" "375252ad7652600be390ca913e029e7c595ee616" "20260108061557.702":
-  entity instruction_decoder at 4( 89) + 0 on 1523;
-  architecture implementation of instruction_decoder at 28( 1050) + 0 on 1524;
-file . "./source/multiplexer_32to1.vhd" "6dec642cae5bae9ba1a8fbbedd672fa9e4ec21c6" "20260108061557.543":
-  entity multiplexer_32to1 at 4( 87) + 0 on 1507;
-  architecture implementation of multiplexer_32to1 at 18( 406) + 0 on 1508;
-file . "./source/arithmetic_logic_unit.vhd" "947d5cb59e7f47c671703118a557b1ab19c66391" "20260108061557.825":
-  entity arithmetic_logic_unit at 4( 91) + 0 on 1533;
-  architecture implementation of arithmetic_logic_unit at 23( 590) + 0 on 1534;
-file . "./source/addersubtractor_N.vhd" "ed2f7d2358edd1752cb67ea96201978c1f056844" "20260108061557.653":
-  entity addersubtractor_n at 4( 87) + 0 on 1519;
-  architecture implementation of addersubtractor_n at 20( 569) + 0 on 1520;
-file . "./source/adder_N.vhd" "8b1a7929ee1b9024ee909968c0d97a4446617db2" "20260108061558.096":
-  entity adder_n at 4( 77) + 0 on 1547;
-  architecture implementation of adder_n at 20( 468) + 0 on 1548;
-file . "./source/adder_1.vhd" "14fc0a13a98d55fddf69a7d8c68718ef96fbb842" "20260108061558.025":
-  entity adder_1 at 4( 77) + 0 on 1543;
-  architecture implementation of adder_1 at 17( 347) + 0 on 1544;
-file . "./source/xor_2.vhd" "9e099e75cb6189bfa051200f66fa8c4f195d9bc5" "20260108061557.518":
-  entity xor_2 at 4( 75) + 0 on 1501;
-  architecture implementation of xor_2 at 15( 261) + 0 on 1502;
-file . "./source/or_2.vhd" "b0cdcf6b0d4e16a493c08bfa08c6ed3da74caad5" "20260108061557.518":
-  entity or_2 at 4( 74) + 0 on 1499;
-  architecture implementation of or_2 at 15( 256) + 0 on 1500;
-file . "./source/and_2.vhd" "91bd4f7591f78e1f761c654cc341c8b278c91440" "20260108061557.517":
-  entity and_2 at 4( 75) + 0 on 1497;
-  architecture implementation of and_2 at 15( 261) + 0 on 1498;
-file . "./source/not_N.vhd" "931fb9c4aa5aadf97170df55a870cfa3f8921897" "20260108061557.517":
-  entity not_n at 4( 75) + 0 on 1495;
-  architecture implementation of not_n at 17( 322) + 0 on 1496;
-file . "./source/not_1.vhd" "b812dec6ccee512e07459a0194c0a3a32eb1b88e" "20260108061557.517":
-  entity not_1 at 4( 75) + 0 on 1493;
-  architecture implementation of not_1 at 14( 231) + 0 on 1494;
-file . "./source/types.vhd" "ae9d34e0678e6b02b9896880d4ccd53d3ade1449" "20260108061557.492":
-  package types at 4( 75) + 0 on 1492;
-file . "./source/multiplexer_2to1.vhd" "5f847c076787106213ffe0e496b71e3b32920f51" "20260108061557.541":
-  entity multiplexer_2to1 at 4( 86) + 0 on 1503;
-  architecture implementation of multiplexer_2to1 at 16( 328) + 0 on 1504;
-file . "./source/multiplexer_2to1_N.vhd" "d487afefd9cd18e65d2f5dfdb58bba1b3c0ef969" "20260108061557.541":
-  entity multiplexer_2to1_n at 4( 88) + 0 on 1505;
-  architecture implementation of multiplexer_2to1_n at 19( 444) + 0 on 1506;
-file . "./source/barrel_shifter.vhd" "1bc3aacc16322cdd8cf07a415bd19bdf9e2525d5" "20260108061557.913":
-  entity barrel_shifter at 4( 84) + 0 on 1539;
-  architecture implementation of barrel_shifter at 17( 512) + 0 on 1540;
-file . "./source/decoder_5to32.vhd" "a0dd27c92e3fbbae830728c42ed32ef464120655" "20260108061557.588":
-  entity decoder_5to32 at 4( 83) + 0 on 1513;
-  architecture implementation of decoder_5to32 at 14( 294) + 0 on 1514;
-file . "./source/instruction_pointer.vhd" "f2fe4a9c0fb298135eac10e15030ca04709e7dc3" "20260108061557.728":
-  entity instruction_pointer at 4( 89) + 0 on 1525;
-  architecture implementation of instruction_pointer at 24( 798) + 0 on 1526;
-file . "./source/register_file.vhd" "2fe62d98f4b151e91f30477cc3ec9f6c4d1e994d" "20260108061557.753":
-  entity register_file at 4( 83) + 0 on 1527;
-  architecture implementation of register_file at 24( 735) + 0 on 1528;
-file . "./source/extender_NtoM.vhd" "76da857dd24e2a252e2d61ca08a13b4392b72b8e" "20260108061557.800":
-  entity extender_ntom at 4( 83) + 0 on 1531;
-  architecture implementation of extender_ntom at 22( 554) + 0 on 1532;
-file . "./source/control_unit.vhd" "3efe2bb1e1af62d98c63f5d341457983ccdd859b" "20260108061557.850":
-  entity control_unit at 4( 82) + 0 on 1535;
-  architecture implementation of control_unit at 35( 1337) + 0 on 1536;
-file . "./test/tb_barrel_shifter.vhd" "7c9f6d4821b83eaeda4e91b37088944076edbaa5" "20260108061557.916":
-  entity tb_barrel_shifter at 4( 87) + 0 on 1541;
-  architecture implementation of tb_barrel_shifter at 20( 414) + 0 on 1542;
-file . "./source/branch_unit.vhd" "8806219a65238038015e5b7d00f03d46bf06a7a3" "20260108061557.875":
-  entity branch_unit at 4( 81) + 0 on 1537;
-  architecture implementation of branch_unit at 22( 600) + 0 on 1538;
-file . "./test/tb_adder_1.vhd" "2cf2bc6fd3bbc4c2cc648a2230cddbc7d3e69969" "20260108061558.027":
-  entity tb_adder_1 at 4( 80) + 0 on 1545;
-  architecture implementation of tb_adder_1 at 18( 466) + 0 on 1546;
+file . "./source/memory.vhd" "a59d72e40ebd933ff20e144e74eff8be6f0a7334" "20260109192650.515":
+  entity memory at 4( 76) + 0 on 3088;
+  architecture implementation of memory at 22( 623) + 0 on 3089;
+file . "./source/register_N.vhd" "9098d76e62378090d134e04c8ed5f64afc85b64e" "20260109192650.505":
+  entity register_n at 4( 80) + 0 on 3070;
+  architecture implementation of register_n at 20( 478) + 0 on 3071;
+file . "./source/register_1.vhd" "21ad0a7da9c0f0dc4d12e199bd974ebc519e5acf" "20260109192650.504":
+  entity register_1 at 4( 80) + 0 on 3068;
+  architecture implementation of register_1 at 17( 386) + 0 on 3069;
+file . "./source/instruction_decoder.vhd" "f4e53514b88dcf178903ce2e7a13e0121e692583" "20260109192650.514":
+  entity instruction_decoder at 4( 89) + 0 on 3082;
+  architecture implementation of instruction_decoder at 28( 1086) + 0 on 3083;
+file . "./source/multiplexer_32to1.vhd" "6dec642cae5bae9ba1a8fbbedd672fa9e4ec21c6" "20260109192650.504":
+  entity multiplexer_32to1 at 4( 87) + 0 on 3066;
+  architecture implementation of multiplexer_32to1 at 18( 406) + 0 on 3067;
+file . "./source/arithmetic_logic_unit.vhd" "947d5cb59e7f47c671703118a557b1ab19c66391" "20260109192650.516":
+  entity arithmetic_logic_unit at 4( 91) + 0 on 3092;
+  architecture implementation of arithmetic_logic_unit at 23( 590) + 0 on 3093;
+file . "./source/addersubtractor_N.vhd" "80dbb1c71abef1bd564c347627109c26cac37354" "20260109192650.506":
+  entity addersubtractor_n at 4( 87) + 0 on 3078;
+  architecture implementation of addersubtractor_n at 20( 569) + 0 on 3079;
+file . "./source/adder_N.vhd" "8b1a7929ee1b9024ee909968c0d97a4446617db2" "20260109192650.506":
+  entity adder_n at 4( 77) + 0 on 3076;
+  architecture implementation of adder_n at 20( 468) + 0 on 3077;
+file . "./source/adder_1.vhd" "14fc0a13a98d55fddf69a7d8c68718ef96fbb842" "20260109192650.505":
+  entity adder_1 at 4( 77) + 0 on 3074;
+  architecture implementation of adder_1 at 17( 347) + 0 on 3075;
+file . "./source/xor_2.vhd" "9e099e75cb6189bfa051200f66fa8c4f195d9bc5" "20260109192650.502":
+  entity xor_2 at 4( 75) + 0 on 3060;
+  architecture implementation of xor_2 at 15( 261) + 0 on 3061;
+file . "./source/or_2.vhd" "b0cdcf6b0d4e16a493c08bfa08c6ed3da74caad5" "20260109192650.501":
+  entity or_2 at 4( 74) + 0 on 3058;
+  architecture implementation of or_2 at 15( 256) + 0 on 3059;
+file . "./source/and_2.vhd" "91bd4f7591f78e1f761c654cc341c8b278c91440" "20260109192650.501":
+  entity and_2 at 4( 75) + 0 on 3056;
+  architecture implementation of and_2 at 15( 261) + 0 on 3057;
+file . "./source/not_N.vhd" "931fb9c4aa5aadf97170df55a870cfa3f8921897" "20260109192650.501":
+  entity not_n at 4( 75) + 0 on 3054;
+  architecture implementation of not_n at 17( 322) + 0 on 3055;
+file . "./source/not_1.vhd" "b812dec6ccee512e07459a0194c0a3a32eb1b88e" "20260109192650.500":
+  entity not_1 at 4( 75) + 0 on 3052;
+  architecture implementation of not_1 at 14( 231) + 0 on 3053;
+file . "./source/types.vhd" "e2de93ba5727e58c69279b549570e4eac1eff5c4" "20260109192650.500":
+  package types at 4( 75) + 0 on 3051;
+file . "./source/multiplexer_2to1.vhd" "5f847c076787106213ffe0e496b71e3b32920f51" "20260109192650.502":
+  entity multiplexer_2to1 at 4( 86) + 0 on 3062;
+  architecture implementation of multiplexer_2to1 at 16( 328) + 0 on 3063;
+file . "./source/multiplexer_2to1_N.vhd" "d487afefd9cd18e65d2f5dfdb58bba1b3c0ef969" "20260109192650.502":
+  entity multiplexer_2to1_n at 4( 88) + 0 on 3064;
+  architecture implementation of multiplexer_2to1_n at 19( 444) + 0 on 3065;
+file . "./source/barrel_shifter.vhd" "1bc3aacc16322cdd8cf07a415bd19bdf9e2525d5" "20260109192650.506":
+  entity barrel_shifter at 4( 84) + 0 on 3080;
+  architecture implementation of barrel_shifter at 17( 512) + 0 on 3081;
+file . "./source/decoder_5to32.vhd" "a0dd27c92e3fbbae830728c42ed32ef464120655" "20260109192650.505":
+  entity decoder_5to32 at 4( 83) + 0 on 3072;
+  architecture implementation of decoder_5to32 at 14( 294) + 0 on 3073;
+file . "./source/instruction_pointer.vhd" "3d9ecb985d161d84b47c60ca6eb8d750adb1cfb7" "20260109192650.514":
+  entity instruction_pointer at 4( 89) + 0 on 3084;
+  architecture implementation of instruction_pointer at 26( 834) + 0 on 3085;
+file . "./source/register_file.vhd" "2d025238403bad9e5443d2275e9bee5d473329f7" "20260109192650.515":
+  entity register_file at 4( 83) + 0 on 3086;
+  architecture implementation of register_file at 24( 735) + 0 on 3087;
+file . "./source/extender_NtoM.vhd" "e3a53d9809caa574c378329ea63133da99f62786" "20260109192650.516":
+  entity extender_ntom at 4( 83) + 0 on 3090;
+  architecture implementation of extender_ntom at 22( 543) + 0 on 3091;
+file . "./source/control_unit.vhd" "f1ee64f2111b35c7ceb309309a4a98f9eda4fcb5" "20260109192650.525":
+  entity control_unit at 4( 82) + 0 on 3094;
+  architecture implementation of control_unit at 38( 1421) + 0 on 3095;
+file . "./test/tb_barrel_shifter.vhd" "4da124b477cf0a10978282a9f9bd4a9fa85a7c34" "20260109192650.548":
+  entity tb_barrel_shifter at 4( 87) + 0 on 3100;
+  architecture implementation of tb_barrel_shifter at 20( 414) + 0 on 3101;
+file . "./source/branch_unit.vhd" "8806219a65238038015e5b7d00f03d46bf06a7a3" "20260109192650.526":
+  entity branch_unit at 4( 81) + 0 on 3096;
+  architecture implementation of branch_unit at 22( 600) + 0 on 3097;
+file . "./test/tb_adder_1.vhd" "1524b39b079c99ffd5181e72728d9f5fcaece805" "20260109192650.639":
+  entity tb_adder_1 at 4( 80) + 0 on 3102;
+  architecture implementation of tb_adder_1 at 18( 364) + 0 on 3103;
+file . "./test/tb_addersubtractor_N.vhd" "567481c9113531f3da98f86df47ce55ddd223fc0" "20260109192650.741":
+  entity tb_addersubtractor_n at 4( 90) + 0 on 3106;
+  architecture implementation of tb_addersubtractor_n at 18( 381) + 0 on 3107;
+file . "./test/tb_arithmetic_logic_unit.vhd" "a13f3b998390a168a238147882e53b815ef054fd" "20260109192650.799":
+  entity tb_arithmetic_logic_unit at 4( 94) + 0 on 3108;
+  architecture implementation of tb_arithmetic_logic_unit at 21( 470) + 0 on 3109;
+file . "./test/tb_branch_unit.vhd" "1fd3fd3ee4ef06596aba674f80217fca146ffa5d" "20260109192650.889":
+  entity tb_branch_unit at 4( 84) + 0 on 3110;
+  architecture implementation of tb_branch_unit at 20( 408) + 0 on 3111;
+file . "./test/tb_decoder_5to32.vhd" "1cc2347a57882f9ad4756a7d80987e0fa266db1f" "20260109192651.011":
+  entity tb_decoder_5to32 at 4( 86) + 0 on 3114;
+  architecture implementation of tb_decoder_5to32 at 18( 382) + 0 on 3115;
+file . "./test/tb_instruction_pointer.vhd" "b86990306552713a002a1a505a057d786ac69de8" "20260109192651.400":
+  entity tb_instruction_pointer at 4( 92) + 0 on 3126;
+  architecture implementation of tb_instruction_pointer at 18( 396) + 0 on 3127;
+file . "./test/tb_multiplexer_2to1.vhd" "2e67fca5c7b688a1cf8d654f783dd6495a7a1fc9" "20260109192651.601":
+  entity tb_multiplexer_2to1 at 4( 89) + 0 on 3132;
+  architecture implementation of tb_multiplexer_2to1 at 18( 391) + 0 on 3133;
+file . "./source/multiplier.vhd" "87efe85e4da15287777484bf2eff8dfbe850fcc5" "20260109192650.526":
+  entity multiplier at 4( 80) + 0 on 3098;
+  architecture implementation of multiplier at 21( 479) + 0 on 3099;

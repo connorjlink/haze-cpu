@@ -31,7 +31,7 @@ signal s_IPData        : std_logic_vector(31 downto 0);
 signal s_IPAddress     : std_logic_vector(31 downto 0);
 
 -- Signals for upcounting logic
-signal s_IPStride    : std_logic_vector(31 downto 0);
+signal s_IsStride4    : std_logic_vector(31 downto 0);
 signal s_LinkAddress : std_logic_vector(31 downto 0);
 
 begin
@@ -57,7 +57,7 @@ begin
             o_Q           => s_IPAddress
         );
 
-    s_IPStride <= 32x"2" when i_Stride = '0' else
+    s_IsStride4 <= 32x"2" when i_Stride = '0' else
                   32x"4";
 
     g_Upcounter: entity work.adder_N
@@ -66,7 +66,7 @@ begin
         )
         port map(
             i_A     => s_IPAddress,
-            i_B     => s_IPStride,
+            i_B     => s_IsStride4,
             i_Carry => '0',
             o_S     => s_LinkAddress,
             o_Carry => open

@@ -33,7 +33,7 @@ component ip is
         i_nInc2_Inc4 : in  std_logic; -- 0 = inc2, 1 = inc4
         i_Stall      : in  std_logic;
         o_Addr       : out std_logic_vector(31 downto 0);
-        o_LinkAddr   : out std_logic_vector(31 downto 0)
+        o_LinkAddress   : out std_logic_vector(31 downto 0)
     );
 end component;
 

@@ -13,7 +13,7 @@ entity hazard_unit is
         i_IFID_RS1       : in  std_logic_vector(4 downto 0);
         i_IFID_RS2       : in  std_logic_vector(4 downto 0);
         i_IFID_IsLoad    : in  std_logic;
-        i_IFID_MemWrite  : in  std_logic;
+        i_IFID_MemoryWriteEnable  : in  std_logic;
 
         i_IDEX_RD        : in  std_logic_vector(4 downto 0);
         i_IDEX_RS1       : in  std_logic_vector(4 downto 0);
@@ -24,7 +24,7 @@ entity hazard_unit is
         i_EXMEM_RS2      : in  std_logic_vector(4 downto 0);
         i_EXMEM_RD       : in  std_logic_vector(4 downto 0);
         i_EXMEM_IsLoad   : in  std_logic;
-        i_EXMEM_RegWrite : in  std_logic;
+        i_EXMEM_RegisterWriteEnable : in  std_logic;
 
         i_MEMWB_RD       : in  std_logic_vector(4 downto 0);
         i_MEMWB_IsLoad   : in  std_logic;
@@ -127,7 +127,7 @@ begin
         --   addi t2, t2, 4
         --   ...
         --   sw t2, 0(t3)
-        if i_EXMEM_RegWrite = '1' and i_IFID_IsLoad = '1' and i_IFID_MemWrite = '1' and (i_EXMEM_RD = i_IFID_RS1 or i_EXMEM_RD = i_IFID_RS2) and i_EXMEM_RD /= 5x"0" then
+        if i_EXMEM_RegisterWriteEnable = '1' and i_IFID_IsLoad = '1' and i_IFID_MemoryWriteEnable = '1' and (i_EXMEM_RD = i_IFID_RS1 or i_EXMEM_RD = i_IFID_RS2) and i_EXMEM_RD /= 5x"0" then
             v_IP_Stall := '1';
             v_IFID_Stall := '1';
             v_IDEX_Flush := '1';
@@ -138,7 +138,7 @@ begin
         --   lw t2, 0(t3)
         --   ...
         --   lw t3, 0(t2)
-        elsif i_EXMEM_RegWrite = '1' and i_EXMEM_IsLoad = '1' and i_IDEX_IsLoad = '1' and (i_EXMEM_RD = i_IDEX_RS1 or i_EXMEM_RD = i_IDEX_RS2) and i_EXMEM_RD /= 5x"0" then
+        elsif i_EXMEM_RegisterWriteEnable = '1' and i_EXMEM_IsLoad = '1' and i_IDEX_IsLoad = '1' and (i_EXMEM_RD = i_IDEX_RS1 or i_EXMEM_RD = i_IDEX_RS2) and i_EXMEM_RD /= 5x"0" then
             v_IP_Stall := '1';
             v_IFID_Stall := '1';
             v_IDEX_Stall := '1';
@@ -150,7 +150,7 @@ begin
         --   addi t2, t2, 1
         --   addi t3, t3, 1
         --   add  t4, t2, t3
-        elsif i_EXMEM_RegWrite = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IFID_RS2 and i_IFID_IsLoad = '0' then
+        elsif i_EXMEM_RegisterWriteEnable = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IFID_RS2 and i_IFID_IsLoad = '0' then
             v_IP_Stall := '1';
             v_IFID_Stall := '1';
             v_IDEX_Flush := '1';
