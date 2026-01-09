@@ -21,7 +21,7 @@ entity tb_RISCV_Processor is
      	    DATA_WIDTH : integer := 32);
 end tb_RISCV_Processor;
 
-architecture mixed of tb_RISCV_Processor is
+architecture implementation of tb_RISCV_Processor is
 
 component RISCV_Processor is
 	generic(
@@ -68,8 +68,8 @@ DUT0: RISCV_Processor
 P_RST: process
 begin
 	reset <= '1';
-	wait for CLOCK_HALF_PERIOD*2;
-	wait for CLOCK_HALF_PERIOD*2;
+	wait for CLOCK_PERIOD;
+	wait for CLOCK_PERIOD;
 	wait for CLOCK_HALF_PERIOD/2; -- don't change inputs on clock edges
 	reset <= '0';
 	wait;
@@ -90,11 +90,11 @@ P_TEST_CASES: process
 begin
 	wait for CLOCK_HALF_PERIOD;
 	wait for CLOCK_HALF_PERIOD/2; -- don't change inputs on clock edges
-    wait for CLOCK_HALF_PERIOD * 2;
+    wait for CLOCK_PERIOD;
 
     -- running loaded hex binary image
     
 	wait;
 end process;
 
-end mixed;
+end implementation;

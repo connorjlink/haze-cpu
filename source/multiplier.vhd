@@ -8,19 +8,19 @@ use work.types.all;
 
 entity multiplier is
     generic(
-        constant N : natural := DATA_WIDTH,
-        constant W : natural := 2*N
+        constant N : natural := DATA_WIDTH;
+        constant M : natural := 2*N
     );
     port(
         i_A : in  std_logic_vector(N-1 downto 0);
         i_B : in  std_logic_vector(N-1 downto 0);
-        o_P : out std_logic_vector(W-1 downto 0)
+        o_P : out std_logic_vector(M-1 downto 0)
     );
 end multiplier;
 
 architecture implementation of multiplier is
 
-    type t_word_array is array (natural range <>) of std_logic_vector(W-1 downto 0);
+    type t_word_array is array (natural range <>) of std_logic_vector(M-1 downto 0);
 
     -- Partial products (N rows), and accumulators (N+1 stages)
     signal s_PartialProducts  : t_word_array(0 to N-1);
@@ -35,7 +35,7 @@ begin
     o_P <= s_Accumulators(N);
 
     g_PP_ROWS : for j in 0 to N-1 generate
-        g_PP_BITS : for w in 0 to W-1 generate
+        g_PP_BITS : for w in 0 to M-1 generate
 
             g_IN_RANGE : if (w >= j) and (w < (j + N)) generate
                 ANDI : entity work.and_2
@@ -57,7 +57,7 @@ begin
     g_ACCUMULATOR : for j in 0 to N-1 generate
         ADDN : entity work.adder_N
             generic map(
-                N => W
+                N => M
             )
             port map(
                 i_A     => s_Accumulators(j),

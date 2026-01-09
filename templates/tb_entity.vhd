@@ -53,6 +53,9 @@ begin
 
     p_Stimulus: process
     begin
+        -- Await reset and stabilization; trigger off-edge
+        wait for CLOCK_HALF_PERIOD;
+        wait for CLOCK_HALF_PERIOD / 2; 
 
         -- TODO: stimulus implementation here
 

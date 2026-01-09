@@ -16,7 +16,7 @@ end tb_register_1;
 
 architecture implementation of tb_register_1 is
 
-constant CLOCK_PERIOD  : time := CLOCK_HALF_PERIOD * 2;
+constant CLOCK_PERIOD : time := CLOCK_HALF_PERIOD * 2;
 
 -- Testbench signals
 signal s_Clock, s_Reset : std_logic := '0';

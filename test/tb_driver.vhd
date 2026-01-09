@@ -20,7 +20,7 @@ entity tb_driver is
      	    DATA_WIDTH : integer := 32);
 end tb_driver;
 
-architecture mixed of tb_driver is
+architecture implementation of tb_driver is
 
 
 constant CLOCK_PERIOD : time := CLOCK_HALF_PERIOD * 2;
@@ -120,7 +120,7 @@ begin
 	reset <= '0';   
 	wait for CLOCK_HALF_PERIOD/2;
 	reset <= '1';
-	wait for CLOCK_HALF_PERIOD*2;
+	wait for CLOCK_PERIOD;
 	reset <= '0';
 	wait;
 end process;  
@@ -131,45 +131,45 @@ P_TEST_CASES: process
 begin
     wait for CLOCK_HALF_PERIOD;
 	wait for CLOCK_HALF_PERIOD/2; -- don't change inputs on clock edges
-    wait for CLOCK_HALF_PERIOD * 2;
+    wait for CLOCK_PERIOD;
 
     -- Test Case 1: 
     -- addi x25, x0, 0   # 0x00000c93
     s_iInsn <= 32x"00000c93";
-    wait for CLOCK_HALF_PERIOD * 2;
-    wait for CLOCK_HALF_PERIOD * 2;
+    wait for CLOCK_PERIOD;
+    wait for CLOCK_PERIOD;
 
     -- Test Case 2:
     -- addi x26, x0, 256 # 0x10000d13
     s_iInsn <= 32x"10000d13";
-    wait for CLOCK_HALF_PERIOD * 2;
-    wait for CLOCK_HALF_PERIOD * 2;
+    wait for CLOCK_PERIOD;
+    wait for CLOCK_PERIOD;
 
     -- Test Case 3:
     -- lw x1, 0(x25)     # 0x000ca083
     s_iInsn <= 32x"000ca083";
-    wait for CLOCK_HALF_PERIOD * 2;
-    wait for CLOCK_HALF_PERIOD * 2;
+    wait for CLOCK_PERIOD;
+    wait for CLOCK_PERIOD;
 
     -- Test Case 4:
     -- lw x2, 4(x25)     # 0x004ca103
     s_iInsn <= 32x"004ca103";
-    wait for CLOCK_HALF_PERIOD * 2;
-    wait for CLOCK_HALF_PERIOD * 2;
+    wait for CLOCK_PERIOD;
+    wait for CLOCK_PERIOD;
 
     -- Test Case 5:
     -- add x1, x1, x2    # 0x002080b3
     s_iInsn <= 32x"002080b3";
-    wait for CLOCK_HALF_PERIOD * 2;
-    wait for CLOCK_HALF_PERIOD * 2;
+    wait for CLOCK_PERIOD;
+    wait for CLOCK_PERIOD;
 
     -- Test Case 6:
     -- sw x1, 0(x26)     # 0x001d2023
     s_iInsn <= 32x"001d2023";
-    wait for CLOCK_HALF_PERIOD * 2;
-    wait for CLOCK_HALF_PERIOD * 2;
+    wait for CLOCK_PERIOD;
+    wait for CLOCK_PERIOD;
 
     wait;
 end process;
 
-end mixed;
+end implementation;
