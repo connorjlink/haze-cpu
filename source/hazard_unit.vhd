@@ -9,27 +9,30 @@ library work;
 use work.types.all;
 
 entity hazard_unit is
+    generic(
+        constant IS_DEBUG : boolean := false
+    );
     port(
-        i_IFID_RS1       : in  std_logic_vector(4 downto 0);
-        i_IFID_RS2       : in  std_logic_vector(4 downto 0);
-        i_IFID_IsLoad    : in  std_logic;
-        i_IFID_MemoryWriteEnable  : in  std_logic;
+        i_IFID_RS1               : in  std_logic_vector(4 downto 0);
+        i_IFID_RS2               : in  std_logic_vector(4 downto 0);
+        i_IFID_IsLoad            : in  std_logic;
+        i_IFID_MemoryWriteEnable : in  std_logic;
 
         i_IDEX_RD        : in  std_logic_vector(4 downto 0);
         i_IDEX_RS1       : in  std_logic_vector(4 downto 0);
         i_IDEX_RS2       : in  std_logic_vector(4 downto 0);
         i_IDEX_IsLoad    : in  std_logic;
 
-        i_EXMEM_RS1      : in  std_logic_vector(4 downto 0);
-        i_EXMEM_RS2      : in  std_logic_vector(4 downto 0);
-        i_EXMEM_RD       : in  std_logic_vector(4 downto 0);
-        i_EXMEM_IsLoad   : in  std_logic;
+        i_EXMEM_RS1                 : in  std_logic_vector(4 downto 0);
+        i_EXMEM_RS2                 : in  std_logic_vector(4 downto 0);
+        i_EXMEM_RD                  : in  std_logic_vector(4 downto 0);
+        i_EXMEM_IsLoad              : in  std_logic;
         i_EXMEM_RegisterWriteEnable : in  std_logic;
 
         i_MEMWB_RD       : in  std_logic_vector(4 downto 0);
         i_MEMWB_IsLoad   : in  std_logic;
 
-        i_BranchMode     : in  natural;
+        i_BranchMode     : in  branch_mode_t;
         i_BranchTaken    : in  std_logic;
         
         i_IDEX_IsBranch  : in  std_logic;
@@ -73,17 +76,19 @@ begin
 
 
         -- Detect jal/j, which doesn't rely on any external data to execute, but will need to clear the pipeline until the remaining instructions are committed
-        if i_BranchMode = work.types.JAL_OR_BCC and i_IDEX_IsBranch = '0' then
+        if i_BranchMode = BRANCHMODE_JAL_OR_BCC and i_IDEX_IsBranch = '0' then
             -- No extra dependencies, so branch is computed taken, no stall to allow IP to update
             --v_IP_Stall := '1';
             v_IFID_Flush := '1';
             v_IDEX_Flush := '1';
-            report "NON-HAZARD BRANCH DETECTED: jal" severity note;
+            if IS_DEBUG then
+                report "NON-HAZARD BRANCH DETECTED: jal" severity note;
+            end if;
 
 
         -- Detect jalr/jr, which relies on the source register for the branch target
-        elsif (i_BranchMode = work.types.JALR) or
-              (i_BranchMode = work.types.JAL_OR_BCC and i_IDEX_IsBranch = '1') then
+        elsif (i_BranchMode = BRANCHMODE_JALR) or
+              (i_BranchMode = BRANCHMODE_JAL_OR_BCC and i_IDEX_IsBranch = '1') then
 
             -- NOTE: if jr, then the link register is x0 which will never cause a hazard
             if (i_IDEX_RD = i_IFID_RS1 and i_IDEX_RD /= 5x"0") or
@@ -92,7 +97,9 @@ begin
                 v_IP_Stall := '1';
                 v_IFID_Stall := '1';
                 v_IDEX_Flush := '1';
-                report "HAZARD DETECTED: bcc/jalr" severity note;
+                if IS_DEBUG then
+                    report "HAZARD DETECTED: bcc/jalr" severity note;
+                end if;
 
             else
                 -- Detect Bcc conditions taken/not taken
@@ -101,10 +108,14 @@ begin
                         -- No extra dependencies, so branch is computed taken, no stall to allow IP to update
                         v_IFID_Flush := '1';
                         v_IDEX_Flush := '1';
-                        report "BRANCH TAKER: bcc" severity note;
+                        if IS_DEBUG then
+                            report "BRANCH TAKEN: bcc" severity note;
+                        end if;
 
                     else
-                        report "BRANCH NOT TAKEN: bcc" severity note;
+                        if IS_DEBUG then
+                            report "BRANCH NOT TAKEN: bcc" severity note;
+                        end if;
 
                     end if;
 
@@ -114,7 +125,9 @@ begin
                     v_IFID_Stall := '1';
                     v_IFID_Flush := '1';
                     v_IDEX_Flush := '1';
-                    report "NON-HAZARD BRANCH: jalr" severity note;
+                    if IS_DEBUG then
+                        report "NON-HAZARD BRANCH: jalr" severity note;
+                    end if;
 
                 end if;
 
@@ -131,7 +144,9 @@ begin
             v_IP_Stall := '1';
             v_IFID_Stall := '1';
             v_IDEX_Flush := '1';
-            report "HAZARD DETECTED: compute-store" severity note;
+            if IS_DEBUG then
+                report "HAZARD DETECTED: compute-store" severity note;
+            end if;
 
         
         -- Fixes triplet instruction sequences like:
@@ -143,7 +158,9 @@ begin
             v_IFID_Stall := '1';
             v_IDEX_Stall := '1';
             v_EXMEM_Flush := '1';
-            report "HAZARD DETECTED: load-load" severity note;
+            if IS_DEBUG then
+                report "HAZARD DETECTED: load-load" severity note;
+            end if;
 
 
         -- Fixes triplet instruction sequences like (which will have been already partially expanded):
@@ -154,7 +171,9 @@ begin
             v_IP_Stall := '1';
             v_IFID_Stall := '1';
             v_IDEX_Flush := '1';
-            report "HAZARD DETECTED: compute-use" severity note;
+            if IS_DEBUG then
+                report "HAZARD DETECTED: compute-use" severity note;
+            end if;
 
 
         -- Fixes duplet instruction sequences like:
@@ -165,7 +184,9 @@ begin
             v_IP_Stall := '1';
             v_IFID_Stall := '1';
             v_IDEX_Flush := '1';
-            report "HAZARD DETECTED: load-use" severity note;
+            if IS_DEBUG then
+                report "HAZARD DETECTED: load-use" severity note;
+            end if;
 
 
         -- NOTE: functionally correct without these cases

@@ -500,7 +500,7 @@ begin
                 when 7b"1100011" => -- B-Format
                     v_Immediate := s_extbImmediate;
                     -- TODO: restructure to use ALU for branch target address calculation
-                    -- v_ALUSource := work.types.ALUSRC_IMM;
+                    -- v_ALUSource := ALUSOURCE_IMMEDIATE;
                     -- v_IPToALU := '1';
                     v_BranchMode := BRANCHMODE_JAL_OR_BCC;
                     v_IsBranch := '1';
@@ -583,12 +583,12 @@ begin
                         report "fence" severity note;
                     end if;
 
-                when 7b"1110011" => -- ecall/ebreak
+                when 7b"1110011" => -- ecall/wfi
                     if i_Instruction = 32b"00000000000100000000000001110011" then
-                        -- ebreak
+                        -- wfi
                         v_Break := '1';
                         if ENABLE_DEBUG then
-                            report "ebreak" severity note; 
+                            report "wfi" severity note; 
                         end if;
                     else
                         -- ecall

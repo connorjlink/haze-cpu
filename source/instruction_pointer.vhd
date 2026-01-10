@@ -9,7 +9,7 @@ use work.types.all;
 
 entity instruction_pointer is
     generic(
-        p_ResetAddress : std_logic_vector(31 downto 0) := 32x"00400000" -- default data page address in RARS
+        ResetAddress : std_logic_vector(31 downto 0) := 32x"00400000" -- default data page address in RARS
     );
     port(
         i_Clock       : in  std_logic;
@@ -36,7 +36,7 @@ signal s_LinkAddress : std_logic_vector(31 downto 0);
 
 begin
 
-    s_IPData <= p_ResetAddress when i_Reset = '1' else
+    s_IPData <= ResetAddress when i_Reset = '1' else
                 i_LoadAddress  when i_Load  = '1' else
                 s_LinkAddress;
 

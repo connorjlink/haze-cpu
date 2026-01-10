@@ -13,4 +13,5 @@ start:
     lw t1, 0(t1)
     blt t1, t2, start
 end:
-    ebreak
+    wfi
+    

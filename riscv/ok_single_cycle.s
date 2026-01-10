@@ -1,6 +1,6 @@
 ###############################
+## Horizon: ok_single_cycle.s
 ## (c) 2026 Connor J. Link. All Rights Reserved.
-## ok_single_cycle.s
 ###############################
 
 .data
@@ -18,4 +18,5 @@ start:
     lw t1, 0(t1)
     blt t1, t2, start
 end:
-    ebreak
+    wfi
+    

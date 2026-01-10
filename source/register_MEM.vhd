@@ -14,8 +14,8 @@ entity register_MEM is
         i_Stall    : in  std_logic;
         i_Flush    : in  std_logic;
 
-        i_Signals  : in  work.types.mem_record_t;
-        o_Signals  : out work.types.mem_record_t
+        i_Signals  : in  mem_record_t;
+        o_Signals  : out mem_record_t
     );
 end register_MEM;
 

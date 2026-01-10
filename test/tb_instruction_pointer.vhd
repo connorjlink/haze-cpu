@@ -19,24 +19,6 @@ architecture implementation of tb_instruction_pointer is
 
 constant CLOCK_PERIOD : time := CLOCK_HALF_PERIOD * 2;
 
--- Element under test
-component ip is
-    generic(
-        -- Signal to hold the default data page address (according to RARS at least)
-        ResetAddress : std_logic_vector(31 downto 0) := 32x"00400000"
-    );
-    port(
-        i_Clock      : in  std_logic;
-        i_Reset      : in  std_logic;
-        i_Load       : in  std_logic;
-        i_Addr       : in  std_logic_vector(31 downto 0);
-        i_nInc2_Inc4 : in  std_logic; -- 0 = inc2, 1 = inc4
-        i_Stall      : in  std_logic;
-        o_Addr       : out std_logic_vector(31 downto 0);
-        o_LinkAddress   : out std_logic_vector(31 downto 0)
-    );
-end component;
-
 -- Testbench signals
 signal s_Clock, s_Reset : std_logic := '0';
 
@@ -53,7 +35,7 @@ begin
     -- Design-under-test instantiation
     DUT: entity work.instruction_pointer
         generic map(
-            p_ResetAddress => 32x"00000000"
+            ResetAddress => 32x"00000000"
         )
         port map(
             i_Clock       => s_Clock,

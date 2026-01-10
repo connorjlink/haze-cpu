@@ -9,7 +9,7 @@ use work.types.all;
 
 entity processor is
     generic(
-        N : integer := DATA_WIDTH
+        constant N : integer := DATA_WIDTH
     );
     port(
         i_Clock               : in  std_logic;
@@ -17,29 +17,30 @@ entity processor is
         i_InstructionLoad     : in  std_logic;
         i_InstructionAddress  : in  std_logic_vector(N-1 downto 0);
         i_InstructionExternal : in  std_logic_vector(N-1 downto 0);
-        o_ALUOutput           : out std_logic_vector(N-1 downto 0) 
+        i_DataLoad            : in  std_logic;
+        i_DataAddress         : in  std_logic_vector(N-1 downto 0);
+        i_DataExternal        : in  std_logic_vector(N-1 downto 0);
+        o_ALUOutput           : out std_logic_vector(N-1 downto 0);
+        o_Halt                : out std_logic
     ); 
 end processor;
 
 architecture implementation of processor is
 
--- Required data memory signals
-signal s_DMemWr       : std_logic;                      -- use this signal as the final active high data memory write enable signal
-signal s_DMemAddr     : std_logic_vector(N-1 downto 0); -- use this signal as the final data memory address input
-signal s_DMemData     : std_logic_vector(N-1 downto 0); -- use this signal as the final data memory data input
-signal s_DMemOut      : std_logic_vector(N-1 downto 0); -- use this signal as the data memory output
+signal s_DataMemoryWriteEnable : std_logic;                      -- data memory write enable signal (active high)
+signal s_DataMemoryAddress     : std_logic_vector(N-1 downto 0); -- data memory address input
+signal s_DataMemoryData        : std_logic_vector(N-1 downto 0); -- data memory data input
+signal s_DataMemoryOutput      : std_logic_vector(N-1 downto 0); -- data memory output
  
--- Required register file signals 
-signal s_RegisterFileWriteEnable        : std_logic;                      -- use this signal as the final active high write enable input to the register file
-signal s_RegisterFileSelect    : std_logic_vector(4 downto 0);   -- use this signal as the final destination register address input
-signal s_RegisterFileData    : std_logic_vector(N-1 downto 0); -- use this signal as the final data memory data input
+signal s_RegisterFileWriteEnable : std_logic;                      -- register file write enable signal (active high)
+signal s_RegisterFileSelect      : std_logic_vector(4 downto 0);   -- destination register address input
+signal s_RegisterFileData        : std_logic_vector(N-1 downto 0); -- data memory data input
 
--- Required instruction memory signals
-signal s_IMemAddr     : std_logic_vector(N-1 downto 0); -- Do not assign this signal, assign to s_NextInstAddr instead
-signal s_NextInstAddr : std_logic_vector(N-1 downto 0); -- use this signal as your intended final instruction memory address input.
-signal s_Inst         : std_logic_vector(N-1 downto 0); -- use this signal as the instruction signal 
+signal s_InstructionMemoryAddress : std_logic_vector(N-1 downto 0); -- instruction memory address input
+signal s_NextInstructionAddress   : std_logic_vector(N-1 downto 0); -- instruction pointer + stride
+signal s_Instruction              : std_logic_vector(N-1 downto 0); -- instruction memory output (fetched)
 
-signal s_Halt         : std_logic;  -- this signal indicates to the simulation that intended program execution has completed.
+signal s_Halt : std_logic;
 
 
 -- Signals to hold the intermediate outputs from the register file
@@ -47,26 +48,26 @@ signal s_RS1Data : std_logic_vector(31 downto 0);
 signal s_RS2Data : std_logic_vector(31 downto 0);
 
 -- Signal to hold the ALU inputs and outputs
-signal s_ALUOperand1 : std_logic_vector(31 downto 0);
+signal s_ALUOperand1     : std_logic_vector(31 downto 0);
 signal s_RealALUOperand1 : std_logic_vector(31 downto 0);
-signal s_ALUOperand2 : std_logic_vector(31 downto 0);
+signal s_ALUOperand2     : std_logic_vector(31 downto 0);
 signal s_RealALUOperand2 : std_logic_vector(31 downto 0);
 
--- Signals to handle the intputs/outputs of the BGU
-signal s_BGUOperand1 : std_logic_vector(31 downto 0);
-signal s_BGUOperand2 : std_logic_vector(31 downto 0);
-signal s_BranchTaken : std_logic;
+-- Signals to handle the intputs/outputs of the branch unit
+signal s_BranchOperand1 : std_logic_vector(31 downto 0);
+signal s_BranchOperand2 : std_logic_vector(31 downto 0);
+signal s_BranchTaken    : std_logic;
 signal s_BranchNotTaken : std_logic;
 
 -- Signal to hold the modified clock
 signal n_Clock  : std_logic;
 
 -- Signals to hold the computed memory instruction address input to the IP
-signal s_BranchAddr : std_logic_vector(31 downto 0);
+signal s_BranchAddress : std_logic_vector(31 downto 0);
 
 -- Signal to output the contents of the instruction pointer
-signal s_IPAddr : std_logic_vector(31 downto 0);
-signal s_IPBreak : std_logic;
+signal s_IPAddress : std_logic_vector(31 downto 0);
+signal s_IPBreak   : std_logic;
 
 -- Signals to drive the hazard detection and correction logic
 signal s_IFID_IsLoad  : std_logic;
@@ -75,8 +76,8 @@ signal s_EXMEM_IsLoad : std_logic;
 signal s_MEMWB_IsLoad : std_logic;
 
 
-
 signal s_ForwardedDMemData : std_logic_vector(31 downto 0);
+signal s_DataMemoryBuffer  : std_logic_vector(31 downto 0);
 
 signal s_MemALUOperand1 : std_logic_vector(31 downto 0) := (others => '0');
 signal s_MemALUOperand2 : std_logic_vector(31 downto 0) := (others => '0');
@@ -87,23 +88,23 @@ signal s_MemALUOperand2 : std_logic_vector(31 downto 0) := (others => '0');
 ---- operating the pool of signals at hand.
 ----
 ---- Thus, EXMEM_IF_raw are the `input` signals to the pipeline register after the ALU
----- stage driven by the instruction register (so IPAddr, Instruction, etc.)
+---- stage driven by the instruction register (so IPAddress, Instruction, etc.)
 ----------------------------------------------------------------------------------
-signal IFID_IF_raw,   IFID_IF_buf   : work.types.insn_record_t;
+signal IFID_IF_raw,   IFID_IF_buf   : IF_record_t;
 
-signal IDEX_IF_raw,   IDEX_IF_buf   : work.types.insn_record_t;
-signal IDEX_ID_raw,   IDEX_ID_buf   : work.types.driver_record_t;
+signal IDEX_IF_raw,   IDEX_IF_buf   : IF_record_t;
+signal IDEX_ID_raw,   IDEX_ID_buf   : ID_record_t;
 
-signal EXMEM_IF_raw,  EXMEM_IF_buf  : work.types.insn_record_t;
-signal EXMEM_ID_raw,  EXMEM_ID_buf  : work.types.driver_record_t;
-signal EXMEM_EX_raw,  EXMEM_EX_buf  : work.types.alu_record_t;
+signal EXMEM_IF_raw,  EXMEM_IF_buf  : IF_record_t;
+signal EXMEM_ID_raw,  EXMEM_ID_buf  : ID_record_t;
+signal EXMEM_EX_raw,  EXMEM_EX_buf  : EX_record_t;
 
-signal MEMWB_IF_raw,  MEMWB_IF_buf  : work.types.insn_record_t;
-signal MEMWB_ID_raw,  MEMWB_ID_buf  : work.types.driver_record_t;
-signal MEMWB_EX_raw,  MEMWB_EX_buf  : work.types.alu_record_t;
-signal MEMWB_MEM_raw, MEMWB_MEM_buf : work.types.mem_record_t;
+signal MEMWB_IF_raw,  MEMWB_IF_buf  : IF_record_t;
+signal MEMWB_ID_raw,  MEMWB_ID_buf  : ID_record_t;
+signal MEMWB_EX_raw,  MEMWB_EX_buf  : EX_record_t;
+signal MEMWB_MEM_raw, MEMWB_MEM_buf : MEM_record_t;
 
-signal WB_WB_raw,     WB_WB_buf     : work.types.wb_record_t;
+signal WB_WB_raw,     WB_WB_buf     : WB_record_t;
 
 signal s_IFID_Stall,  s_IFID_Flush  : std_logic := '0';
 signal s_IDEX_Stall,  s_IDEX_Flush  : std_logic := '0';
@@ -113,11 +114,11 @@ signal s_EXMEM_Stall, s_EXMEM_Flush : std_logic := '0';
 ----------------------------------------------------------------------------------
 ---- Data Forwarding Signals
 ----------------------------------------------------------------------------------
-signal s_ForwardALUOperand1 : natural := 0;
-signal s_ForwardALUOperand2 : natural := 0;
-signal s_ForwardBGUOperand1 : natural := 0;
-signal s_ForwardBGUOperand2 : natural := 0;
-signal s_ForwardMemData     : natural := 0;
+signal s_ForwardALUOperand1 : forwarding_path_t := FORWARDING_NONE;
+signal s_ForwardALUOperand2 : forwarding_path_t := FORWARDING_NONE;
+signal s_ForwardBGUOperand1 : forwarding_path_t := FORWARDING_NONE;
+signal s_ForwardBGUOperand2 : forwarding_path_t := FORWARDING_NONE;
+signal s_ForwardMemData     : forwarding_path_t := FORWARDING_NONE;
 ----------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------
@@ -126,28 +127,28 @@ signal s_ForwardMemData     : natural := 0;
 
 function ExtendMemoryData(
     Data             : std_logic_vector(31 downto 0);
-    MemoryWidth      : natural;
-    IsSignExtend       : std_logic;
+    MemoryWidth      : data_width_t;
+    IsSignExtend     : std_logic;
     DestinationWidth : natural
 ) return std_logic_vector is
     variable Result : std_logic_vector(DestinationWidth - 1 downto 0);
 begin
     case MemoryWidth is
-        when work.types.BYTE =>
+        when BYTE_TYPE =>
             if IsSignExtend = '0' then
                 Result := std_logic_vector(resize(unsigned(Data(7 downto 0)), DestinationWidth));
             else
                 Result := std_logic_vector(resize(signed(Data(7 downto 0)), DestinationWidth));
             end if;
 
-        when work.types.HALF =>
+        when HALF_TYPE =>
             if IsSignExtend = '0' then
                 Result := std_logic_vector(resize(unsigned(Data(15 downto 0)), DestinationWidth));
             else
                 Result := std_logic_vector(resize(signed(Data(15 downto 0)), DestinationWidth));
             end if;
 
-        when work.types.WORD =>
+        when WORD_TYPE =>
             if IsSignExtend = '0' then
                 Result := std_logic_vector(resize(unsigned(Data(31 downto 0)), DestinationWidth));
             else
@@ -172,41 +173,45 @@ begin
 
     n_Clock <= not i_Clock;
 
-    -- This is required to be your final input to your instruction memory. This provides a feasible method to externally load the memory module which means that the synthesis tool must assume it knows nothing about the values stored in the instruction memory. If this is not included, much, if not all of the design is optimized out because the synthesis tool will believe the memory to be all zeros.
     with i_InstructionLoad select
-        s_IMemAddr <= 
-            s_NextInstAddr       when '0',
+        s_InstructionMemoryAddress <= 
+            s_IPAddress          when '0',
             i_InstructionAddress when others;
 
+    -----------------------------------------------------
+    ---- Memory Subsystem
+    -----------------------------------------------------
 
     InstructionMemory: entity work.memory
         generic map(
-            ADDR_WIDTH => work.types.ADDR_WIDTH,
+            ADDRESS_WIDTH => ADDRESS_WIDTH,
             DATA_WIDTH => N
         )
         port map(
-            clk  => i_Clock,
-            addr => s_IPAddr(11 downto 2),
-            data => i_InstructionExternal,
-            we   => i_InstructionLoad,
-            q    => s_Inst
+            i_Clock       => i_Clock,
+            i_Address     => s_InstructionMemoryAddress(11 downto 2),
+            i_Data        => i_InstructionExternal,
+            i_WriteEnable => i_InstructionLoad,
+            o_Data        => s_Instruction
         );
   
     DataMemory: entity work.memory
         generic map(
-            ADDR_WIDTH => work.types.ADDR_WIDTH,
+            ADDRESS_WIDTH => ADDRESS_WIDTH,
             DATA_WIDTH => N
         )
         port map(
-            clk  => n_Clock, -- i_Clock
-            addr => s_DMemAddr(11 downto 2),
-            data => s_DMemData,
-            we   => s_DMemWr,
-            q    => s_DMemOut
+            i_Clock       => n_Clock, -- i_Clock
+            i_Address     => s_DataMemoryAddress(11 downto 2),
+            i_Data        => s_DataMemoryData,
+            i_WriteEnable => s_DataMemoryWriteEnable,
+            o_Data        => s_DataMemoryOutput
         );
 
-    MEMWB_MEM_raw.Data <= ExtendMemoryData(s_DMemOut, MEMWB_ID_raw.MemoryWidth, '1', 32);
-    IDEX_ID_raw.Data <= ExtendMemoryData(s_DMemOut, IDEX_ID_raw.MemoryWidth, '1', 32);
+    MEMWB_MEM_raw.Data <= ExtendMemoryData(s_DataMemoryOutput, MEMWB_ID_raw.MemoryWidth, '1', 32);
+    IDEX_ID_raw.Data <= ExtendMemoryData(s_DataMemoryOutput, IDEX_ID_raw.MemoryWidth, '1', 32);
+
+    -----------------------------------------------------
 
 
     -----------------------------------------------------
@@ -351,9 +356,9 @@ begin
     ---- Register File -> x stage register(s)
     -----------------------------------------------------
 
-    WB_WB_raw.F       <= MEMWB_EX_buf.F;
-    WB_WB_raw.Data    <= MEMWB_MEM_buf.Data;
-    WB_WB_raw.Forward <= s_ForwardMemData;
+    WB_WB_raw.Result      <= MEMWB_EX_buf.Result;
+    WB_WB_raw.Data        <= MEMWB_MEM_buf.Data;
+    WB_WB_raw.Forward     <= s_ForwardMemData;
     WB_WB_raw.MemoryWidth <= MEMWB_ID_buf.MemoryWidth;
 
     WBWB_RegisterWB: entity work.register_WB
@@ -374,28 +379,28 @@ begin
     ---- Instruction Pointer Unit
     -----------------------------------------------------
 
-    s_BranchAddr <= std_logic_vector(signed(IDEX_IF_buf.IPAddr) + signed(IDEX_ID_buf.Immediate)) when (IDEX_ID_buf.BranchMode = work.types.JAL_OR_BCC) else
-                    std_logic_vector(signed(IDEX_ID_buf.DS1)    + signed(IDEX_ID_buf.Immediate)) when (IDEX_ID_buf.BranchMode = work.types.JALR)       else 
-                    (others => '0');
+    s_BranchAddress <= std_logic_vector(signed(IDEX_IF_buf.InstructionAddress) + signed(IDEX_ID_buf.Immediate)) when (IDEX_ID_buf.BranchMode = BRANCHMODE_JAL_OR_BCC) else
+                       std_logic_vector(signed(IDEX_ID_buf.DS1)                + signed(IDEX_ID_buf.Immediate)) when (IDEX_ID_buf.BranchMode = BRANCHMODE_JALR) else 
+                       (others => '0');
 
-    CPU_IP: entity work.ip
+    InstructionPointer: entity work.instruction_pointer
         generic map(
             ResetAddress => 32x"00400000"
         )
         port map(
-            i_Clock        => i_Clock,
-            i_Reset        => i_Reset,
-            i_Stall      => s_IPBreak,
-            i_Load       => s_BranchTaken,
-            i_Addr       => s_BranchAddr,
-            i_nInc2_Inc4 => '1', -- IDEX_ID_buf.IsStride4, -- NOTE: This might be 1 pipeline stage too late to increment the correct corresponding amount. But, resolving this requires instruction pre-decoding to compute length, so just assume 4-byte instructions for now
-            o_Addr       => s_IPAddr,
-            o_LinkAddress   => s_NextInstAddr 
+            i_Clock       => i_Clock,
+            i_Reset       => i_Reset,
+            i_Stall       => s_IPBreak,
+            i_Load        => s_BranchTaken,
+            i_LoadAddress => s_BranchAddress,
+            i_Stride      => '1', -- IDEX_ID_buf.IsStride4, -- NOTE: This might be 1 pipeline stage too late to increment the correct corresponding amount. But, resolving this requires instruction pre-decoding to compute length, so just assume 4-byte instructions for now
+            o_Address     => s_IPAddress,
+            o_LinkAddress => s_NextInstructionAddress
         );
 
-    IFID_IF_raw.IPAddr   <= s_IPAddr;
-    IFID_IF_raw.LinkAddress <= s_NextInstAddr;
-    IFID_IF_raw.Instruction     <= s_Inst;
+    IFID_IF_raw.InstructionAddress <= s_IPAddress;
+    IFID_IF_raw.LinkAddress        <= s_NextInstructionAddress;
+    IFID_IF_raw.Instruction        <= s_Instruction;
 
     -----------------------------------------------------
 
@@ -405,24 +410,24 @@ begin
     -----------------------------------------------------
 
     with s_ForwardBGUOperand1 select
-        s_BGUOperand1 <=
-            EXMEM_EX_buf.F     when work.types.FROM_EXMEM_ALU,
-            MEMWB_EX_buf.F     when work.types.FROM_MEMWB_ALU,
-            MEMWB_MEM_buf.Data when work.types.FROM_MEM,
-            IDEX_ID_buf.DS1    when others;
+        s_BranchOperand1 <=
+            EXMEM_EX_buf.Result when FORWARDING_FROMEXMEM_ALU,
+            MEMWB_EX_buf.Result when FORWARDING_FROMMEMWB_ALU,
+            MEMWB_MEM_buf.Data  when FORWARDING_FROMMEM,
+            IDEX_ID_buf.DS1     when others;
 
     with s_ForwardBGUOperand2 select
-        s_BGUOperand2 <= 
-            EXMEM_EX_buf.F     when work.types.FROM_EXMEM_ALU,
-            MEMWB_EX_buf.F     when work.types.FROM_MEMWB_ALU,
-            MEMWB_MEM_buf.Data when work.types.FROM_MEM,
-            IDEX_ID_buf.DS2    when others;
+        s_BranchOperand2 <= 
+            EXMEM_EX_buf.Result when FORWARDING_FROMEXMEM_ALU,
+            MEMWB_EX_buf.Result when FORWARDING_FROMMEMWB_ALU,
+            MEMWB_MEM_buf.Data  when FORWARDING_FROMMEM,
+            IDEX_ID_buf.DS2     when others;
 
     BranchUnit: entity work.branch_unit
         port map(
             i_Clock          => i_Clock,
-            i_DS1            => s_BGUOperand1,
-            i_DS2            => s_BGUOperand2,
+            i_DS1            => s_BranchOperand1,
+            i_DS2            => s_BranchOperand2,
             i_BranchOperator => IDEX_ID_buf.BranchOperator,
             o_BranchTaken    => s_BranchTaken,
             o_BranchNotTaken => s_BranchNotTaken
@@ -445,12 +450,12 @@ begin
             o_RegisterSource            => IDEX_ID_raw.RegisterSource,
             o_ALUSource                 => IDEX_ID_raw.ALUSource,
             o_ALUOperator               => IDEX_ID_raw.ALUOperator,
-            o_BGUOperator               => IDEX_ID_raw.BranchOperator,
+            o_BranchOperator            => IDEX_ID_raw.BranchOperator,
             o_MemoryWidth               => IDEX_ID_raw.MemoryWidth,
             o_BranchMode                => IDEX_ID_raw.BranchMode,
             o_RD                        => IDEX_ID_raw.RD,
             o_RS1                       => IDEX_ID_raw.RS1,
-            o_RS2                       => IDEX_ID_raw.RS2, 
+            o_RS2                       => IDEX_ID_raw.RS2,
             o_Immediate                 => IDEX_ID_raw.Immediate,
             o_Break                     => IDEX_ID_raw.Break,
             o_IsBranch                  => IDEX_ID_raw.IsBranch,
@@ -472,7 +477,7 @@ begin
     with MEMWB_ID_buf.RegisterSource select
         s_RegisterFileData <=
             MEMWB_MEM_buf.Data       when RFSOURCE_FROMRAM,
-            MEMWB_EX_buf.F           when RFSOURCE_FROMALU,
+            MEMWB_EX_buf.Result           when RFSOURCE_FROMALU,
             MEMWB_IF_buf.LinkAddress when RFSOURCE_FROMNEXTIP,
             MEMWB_ID_buf.Immediate   when RFSOURCE_FROMIMMEDIATE,
             (others => '0')          when others;
@@ -483,15 +488,15 @@ begin
 
     RegisterFile: entity work.register_file
         port map(
-            i_Clock => n_Clock,
-            i_Reset => i_Reset,
-            i_RS1   => IDEX_ID_raw.RS1, -- NOTE: registers reads occur in the decode stage unless forwarding
-            i_RS2   => IDEX_ID_raw.RS2,
-            i_RD    => s_RegisterFileSelect,
-            i_WE    => s_RegisterFileWriteEnable,
-            i_D     => s_RegisterFileData,
-            o_DS1   => s_RS1Data,
-            o_DS2   => s_RS2Data
+            i_Clock       => n_Clock,
+            i_Reset       => i_Reset,
+            i_RS1         => IDEX_ID_raw.RS1, -- NOTE: registers reads occur in the decode stage unless forwarding
+            i_RS2         => IDEX_ID_raw.RS2,
+            i_RD          => s_RegisterFileSelect,
+            i_WriteEnable => s_RegisterFileWriteEnable,
+            i_D           => s_RegisterFileData,
+            o_DS1         => s_RS1Data,
+            o_DS2         => s_RS2Data
         );
 
     -----------------------------------------------------
@@ -501,47 +506,47 @@ begin
     ---- Arithmetic Logic Unit
     -----------------------------------------------------
 
-    s_MemALUOperand1 <= MEMWB_MEM_buf.Data when (MEMWB_ID_buf.MemoryWidth /= 0) else
-                        MEMWB_EX_buf.F;
+    s_MemALUOperand1 <= MEMWB_MEM_buf.Data when (MEMWB_ID_buf.MemoryWidth /= NONE_TYPE) else
+                        MEMWB_EX_buf.Result;
 
-    s_MemALUOperand2 <= MEMWB_MEM_buf.Data when (MEMWB_ID_buf.MemoryWidth /= 0) else
-                        MEMWB_EX_buf.F;      
+    s_MemALUOperand2 <= MEMWB_MEM_buf.Data when (MEMWB_ID_buf.MemoryWidth /= NONE_TYPE) else
+                        MEMWB_EX_buf.Result;
 
     with s_ForwardALUOperand1 select
         s_ALUOperand1 <=
-            EXMEM_EX_buf.F   when work.types.FROM_EX,
-            s_MemALUOperand1 when work.types.FROM_MEM,
-            MEMWB_EX_buf.F   when work.types.FROM_MEMWB_ALU,
-            IDEX_ID_buf.DS1  when others;
+            EXMEM_EX_buf.Result when FORWARDING_FROMEX,
+            s_MemALUOperand1    when FORWARDING_FROMMEM,
+            MEMWB_EX_buf.Result when FORWARDING_FROMMEMWB_ALU,
+            IDEX_ID_buf.DS1     when others;
 
     with s_ForwardALUOperand2 select
         s_RealALUOperand2 <=
-            EXMEM_EX_buf.F   when work.types.FROM_EX,
-            MEMWB_EX_buf.F   when work.types.FROM_MEMWB_ALU,
-            s_MemALUOperand2 when work.types.FROM_MEM,
-            s_ALUOperand2    when others;
+            EXMEM_EX_buf.Result when FORWARDING_FROMEX,
+            MEMWB_EX_buf.Result when FORWARDING_FROMMEMWB_ALU,
+            s_MemALUOperand2    when FORWARDING_FROMMEM,
+            s_ALUOperand2       when others;
 
     -- NOTE: only the first operand is backwards here because IPToALU (for `auipc`) must take precedence over any potential data forwarding
-    s_RealALUOperand1 <= (others => '0')    when (IDEX_ID_buf.ALUSource  = work.types.ALUSRC_BIGIMM) else
-                         IDEX_IF_buf.IPAddr when (IDEX_ID_buf.IPToALU = '1') else
-                         s_ALUOperand1      when (IDEX_ID_buf.IPToALU = '0') else
+    s_RealALUOperand1 <= (others => '0')                when (IDEX_ID_buf.ALUSource  = ALUSOURCE_BIGIMMEDIATE) else
+                         IDEX_IF_buf.InstructionAddress when (IDEX_ID_buf.IPToALU = '1') else
+                         s_ALUOperand1                  when (IDEX_ID_buf.IPToALU = '0') else
                          (others => '0');
 
-    s_ALUOperand2 <= IDEX_ID_buf.Immediate when (IDEX_ID_buf.ALUSource = work.types.ALUSRC_IMM)    else
-                     IDEX_ID_buf.Immediate when (IDEX_ID_buf.ALUSource = work.types.ALUSRC_BIGIMM) else
-                     IDEX_ID_buf.DS2 when (IDEX_ID_buf.ALUSource = work.types.ALUSRC_REG)    else
+    s_ALUOperand2 <= IDEX_ID_buf.Immediate when (IDEX_ID_buf.ALUSource = ALUSOURCE_IMMEDIATE) else
+                     IDEX_ID_buf.Immediate when (IDEX_ID_buf.ALUSource = ALUSOURCE_BIGIMMEDIATE) else
+                     IDEX_ID_buf.DS2       when (IDEX_ID_buf.ALUSource = ALUSOURCE_REGISTER) else
                      (others => '0');
 
-    CPU_ALU: entity work.alu
+    ArithmeticLogicUnit: entity work.arithmetic_logic_unit
         port map(
-            i_A     => s_RealALUOperand1,
-            i_B     => s_RealALUOperand2,
-            i_ALUOperator => EXMEM_ID_raw.ALUOperator,
-            o_F     => EXMEM_EX_raw.F,
-            o_Co    => EXMEM_EX_raw.Co
+            i_A        => s_RealALUOperand1,
+            i_B        => s_RealALUOperand2,
+            i_Operator => EXMEM_ID_raw.ALUOperator,
+            o_F        => EXMEM_EX_raw.Result,
+            o_Carry    => EXMEM_EX_raw.CarryOut
         );
 
-    o_ALUOutput <= EXMEM_EX_raw.F;
+    o_ALUOutput <= EXMEM_EX_raw.Result;
 
     -----------------------------------------------------
 
@@ -550,22 +555,33 @@ begin
     ---- Data Memory Subsystem
     -----------------------------------------------------
 
-    s_DMemWr <= EXMEM_ID_buf.MemoryWriteEnable;
-    s_DMemAddr <= EXMEM_EX_buf.F;
+    with i_DataLoad select
+        s_DataMemoryAddress <= 
+            i_DataAddress       when '1',
+            EXMEM_EX_buf.Result when others;
+
+    with i_DataLoad select
+        s_DataMemoryData <= 
+            i_DataExternal     when '1',
+            s_DataMemoryBuffer when others;
+
+    with i_DataLoad select
+        s_DataMemoryWriteEnable <= 
+            '1'                            when '1',
+            EXMEM_ID_buf.MemoryWriteEnable when others;
 
     with WB_WB_buf.Forward select 
         s_ForwardedDMemData <= 
-            ExtendMemoryData(WB_WB_buf.Data, WB_WB_buf.MemoryWidth,    '1', 32) when work.types.FROM_MEM,
-            ExtendMemoryData(MEMWB_EX_buf.F, MEMWB_ID_buf.MemoryWidth, '1', 32) when work.types.FROM_EXMEM_ALU,
-            ExtendMemoryData(WB_WB_buf.F,    WB_WB_buf.MemoryWidth,    '1', 32) when work.types.FROM_MEMWB_ALU,     
+            ExtendMemoryData(WB_WB_buf.Data, WB_WB_buf.MemoryWidth,    '1', 32)      when FORWARDING_FROMMEM,
+            ExtendMemoryData(MEMWB_EX_buf.Result, MEMWB_ID_buf.MemoryWidth, '1', 32) when FORWARDING_FROMEXMEM_ALU,
+            ExtendMemoryData(WB_WB_buf.Result,    WB_WB_buf.MemoryWidth,    '1', 32) when FORWARDING_FROMMEMWB_ALU,
             (others => '0')   when others;
 
-
-    s_DMemData <= s_ForwardedDMemData when (WB_WB_buf.Forward /= 0) else
-                  std_logic_vector(resize(unsigned(EXMEM_ID_buf.DS2(7  downto 0)), s_DMemData'length)) when (EXMEM_ID_buf.MemoryWidth = work.types.BYTE) else
-                  std_logic_vector(resize(unsigned(EXMEM_ID_buf.DS2(15 downto 0)), s_DMemData'length)) when (EXMEM_ID_buf.MemoryWidth = work.types.HALF) else
-                  std_logic_vector(resize(unsigned(EXMEM_ID_buf.DS2(31 downto 0)), s_DMemData'length)) when (EXMEM_ID_buf.MemoryWidth = work.types.WORD) else
-                  (others => '0');
+    s_DataMemoryBuffer <= s_ForwardedDMemData when (WB_WB_buf.Forward /= FORWARDING_NONE) else
+        std_logic_vector(resize(unsigned(EXMEM_ID_buf.DS2(7  downto 0)), s_DataMemoryBuffer'length)) when (EXMEM_ID_buf.MemoryWidth = BYTE_TYPE) else
+        std_logic_vector(resize(unsigned(EXMEM_ID_buf.DS2(15 downto 0)), s_DataMemoryBuffer'length)) when (EXMEM_ID_buf.MemoryWidth = HALF_TYPE) else
+        std_logic_vector(resize(unsigned(EXMEM_ID_buf.DS2(31 downto 0)), s_DataMemoryBuffer'length)) when (EXMEM_ID_buf.MemoryWidth = WORD_TYPE) else
+        (others => '0');
 
     -----------------------------------------------------
 
@@ -578,27 +594,27 @@ begin
     -- Hence, any hazard checks will need to also inspect for memory or register write 
     -- to determine to which case a particular hazard corresponds.
 
-    s_IFID_IsLoad  <= '1' when (IDEX_ID_raw.MemoryWidth  /= 0) else '0';
-    s_IDEX_IsLoad  <= '1' when (IDEX_ID_buf.MemoryWidth  /= 0) else '0';
-    s_EXMEM_IsLoad <= '1' when (EXMEM_ID_buf.MemoryWidth /= 0) else '0';
-    s_MEMWB_IsLoad <= '1' when (MEMWB_ID_buf.MemoryWidth /= 0) else '0';
+    s_IFID_IsLoad  <= '1' when (IDEX_ID_raw.MemoryWidth  /= NONE_TYPE) else '0';
+    s_IDEX_IsLoad  <= '1' when (IDEX_ID_buf.MemoryWidth  /= NONE_TYPE) else '0';
+    s_EXMEM_IsLoad <= '1' when (EXMEM_ID_buf.MemoryWidth /= NONE_TYPE) else '0';
+    s_MEMWB_IsLoad <= '1' when (MEMWB_ID_buf.MemoryWidth /= NONE_TYPE) else '0';
     
-    CPU_HMU: entity work.hmu
+    HazardUnit: entity work.hazard_unit
         port map(
-            i_IFID_RS1       => IDEX_ID_raw.RS1,
-            i_IFID_RS2       => IDEX_ID_raw.RS2,
-            i_IFID_IsLoad    => s_IFID_IsLoad,
-            i_IFID_MemoryWriteEnable  => IDEX_ID_raw.MemoryWriteEnable,
+            i_IFID_RS1               => IDEX_ID_raw.RS1,
+            i_IFID_RS2               => IDEX_ID_raw.RS2,
+            i_IFID_IsLoad            => s_IFID_IsLoad,
+            i_IFID_MemoryWriteEnable => IDEX_ID_raw.MemoryWriteEnable,
 
             i_IDEX_RS1       => IDEX_ID_buf.RS1,
             i_IDEX_RS2       => IDEX_ID_buf.RS2,
             i_IDEX_RD        => IDEX_ID_buf.RD,
             i_IDEX_IsLoad    => s_IDEX_IsLoad,
 
-            i_EXMEM_RS1      => EXMEM_ID_buf.RS1,
-            i_EXMEM_RS2      => EXMEM_ID_buf.RS2,
-            i_EXMEM_RD       => EXMEM_ID_buf.RD,
-            i_EXMEM_IsLoad   => s_EXMEM_IsLoad,
+            i_EXMEM_RS1                 => EXMEM_ID_buf.RS1,
+            i_EXMEM_RS2                 => EXMEM_ID_buf.RS2,
+            i_EXMEM_RD                  => EXMEM_ID_buf.RD,
+            i_EXMEM_IsLoad              => s_EXMEM_IsLoad,
             i_EXMEM_RegisterWriteEnable => EXMEM_ID_buf.RegisterWriteEnable,
 
             i_MEMWB_RD       => MEMWB_ID_buf.RD,
@@ -619,29 +635,29 @@ begin
             o_EXMEM_Stall    => s_EXMEM_Stall
         );
 
-    CPU_DFU: entity work.forwarding_unit
+    ForwardingUnit: entity work.forwarding_unit
         port map(
             i_IFID_RS1              => IDEX_ID_raw.RS1,
             i_IFID_RS2              => IDEX_ID_raw.RS2,
             i_IFID_IsLoad           => s_IFID_IsLoad,
 
-            i_IDEX_RS1              => IDEX_ID_buf.RS1,
-            i_IDEX_RS2              => IDEX_ID_buf.RS2,
-            i_IDEX_MemoryWriteEnable         => IDEX_ID_buf.MemoryWriteEnable,
-            i_IDEX_IsLoad           => s_IDEX_IsLoad,
-            i_IDEX_ALUSource           => IDEX_ID_buf.ALUSource,
+            i_IDEX_RS1               => IDEX_ID_buf.RS1,
+            i_IDEX_RS2               => IDEX_ID_buf.RS2,
+            i_IDEX_MemoryWriteEnable => IDEX_ID_buf.MemoryWriteEnable,
+            i_IDEX_IsLoad            => s_IDEX_IsLoad,
+            i_IDEX_ALUSource         => IDEX_ID_buf.ALUSource,
 
-            i_EXMEM_RS1             => EXMEM_ID_buf.RS1,
-            i_EXMEM_RS2             => EXMEM_ID_buf.RS2,
-            i_EXMEM_RD              => EXMEM_ID_buf.RD,
-            i_EXMEM_RegisterWriteEnable        => EXMEM_ID_buf.RegisterWriteEnable,
-            i_EXMEM_MemoryWriteEnable        => EXMEM_ID_buf.MemoryWriteEnable,
-            i_EXMEM_IsLoad          => s_EXMEM_IsLoad,
+            i_EXMEM_RS1                 => EXMEM_ID_buf.RS1,
+            i_EXMEM_RS2                 => EXMEM_ID_buf.RS2,
+            i_EXMEM_RD                  => EXMEM_ID_buf.RD,
+            i_EXMEM_RegisterWriteEnable => EXMEM_ID_buf.RegisterWriteEnable,
+            i_EXMEM_MemoryWriteEnable   => EXMEM_ID_buf.MemoryWriteEnable,
+            i_EXMEM_IsLoad              => s_EXMEM_IsLoad,
 
-            i_MEMWB_RD              => MEMWB_ID_buf.RD,
-            i_MEMWB_RegisterWriteEnable        => MEMWB_ID_buf.RegisterWriteEnable,
-            i_MEMWB_MemoryWriteEnable        => MEMWB_ID_buf.MemoryWriteEnable,
-            i_MEMWB_IsLoad          => s_MEMWB_IsLoad,
+            i_MEMWB_RD                  => MEMWB_ID_buf.RD,
+            i_MEMWB_RegisterWriteEnable => MEMWB_ID_buf.RegisterWriteEnable,
+            i_MEMWB_MemoryWriteEnable   => MEMWB_ID_buf.MemoryWriteEnable,
+            i_MEMWB_IsLoad              => s_MEMWB_IsLoad,
 
             i_BranchMode            => IDEX_ID_buf.BranchMode,
             i_BranchTaken           => s_BranchTaken,

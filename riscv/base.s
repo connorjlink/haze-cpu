@@ -376,7 +376,7 @@ skip8:
     lw x7, 0(x9)
     bne x7, x8, fail
 
-    # omitting fence, ecall, ebreak since they all just implement a no-op or trap
+    # omitting fence, ecall, wfi since they all just implement a no-op or trap
 
     # Success if execution reaches here
     j pass
@@ -390,4 +390,4 @@ pass:
     li x1, 0           # return 0 (EXIT_SUCCESS)
 
 end:
-    ebreak
+    wfi

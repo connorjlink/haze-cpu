@@ -8,7 +8,7 @@ package types is
 
 -- Generic placeholders to define the bit widths for the architecture
 constant DATA_WIDTH : natural := 32;
-constant ADDR_WIDTH : natural := 10;
+constant ADDRESS_WIDTH : natural := 10;
 
 -- Type declaration for the register file storage
 type array_t is array (natural range <>) of std_logic_vector(31 downto 0);
@@ -28,6 +28,7 @@ type branch_operator_t is (
 
 -- Corresponding to each load/store data width
 type data_width_t is (
+    NONE_TYPE,
     BYTE_TYPE,
     HALF_TYPE,
     WORD_TYPE,
@@ -72,6 +73,7 @@ type branch_mode_t is (
 
 -- Corresponding to each data fowarding path
 type forwarding_path_t is (
+    FORWARDING_NONE,
     FORWARDING_FROMEX,
     FORWARDING_FROMMEM,
     FORWARDING_FROMEXMEM_ALU,
@@ -106,46 +108,46 @@ constant IF_NOP : IF_record_t := (
 -- NOTE: Control unit is the first cause of exceptions: illegal instructions.
 
 type ID_record_t is record
-    MemoryWriteEnableEnable   : std_logic;
-    RegisterWriteEnableEnable : std_logic;
-    RegisterSource      : natural;
+    MemoryWriteEnable   : std_logic;
+    RegisterWriteEnable : std_logic;
+    RegisterSource      : rf_source_t;
     ALUSource           : alu_source_t;
-    ALUOperator         : natural;
-    BGUOperator         : natural;
-    MemoryWidth         : natural;
+    ALUOperator         : alu_operator_t;
+    BranchOperator      : branch_operator_t;
+    MemoryWidth         : data_width_t;
+    BranchMode          : branch_mode_t;
     RD                  : std_logic_vector(4 downto 0);
     RS1                 : std_logic_vector(4 downto 0);
     RS2                 : std_logic_vector(4 downto 0);
     DS1                 : std_logic_vector(31 downto 0);
     DS2                 : std_logic_vector(31 downto 0);
     Immediate           : std_logic_vector(31 downto 0);
-    IsFaulted           : std_logic;
-    BranchMode          : natural;
+    Break           : std_logic;
     IsBranch            : std_logic;
-    IsStride4            : std_logic; -- 0: 2 bytes, 1: 4 bytes
+    IsStride4           : std_logic; -- 0: 2 bytes, 1: 4 bytes
     IsSignExtend        : std_logic; -- 0: zero-extend, 1: sign-extend
     IPToALU             : std_logic;
     Data                : std_logic_vector(31 downto 0);
 end record ID_record_t;
 
 constant ID_NOP : ID_record_t := (
-    MemoryWriteEnableEnable   => '0',
-    RegisterWriteEnableEnable => '0',
-    RegisterSource      => 0,
-    ALUSource           => ALUSOURCE_REGISTER,
-    ALUOperator         => 0,
-    BGUOperator         => 0,
-    MemoryWidth         => 0,
+    MemoryWriteEnable   => '0',
+    RegisterWriteEnable => '0',
+    RegisterSource      => RFSOURCE_FROMALU,
+    ALUSource           => ALUSOURCE_IMMEDIATE,
+    ALUOperator         => ADD_OPERATOR,
+    MemoryWidth         => NONE_TYPE,
+    BranchOperator      => BRANCH_NONE,
+    BranchMode          => BRANCHMODE_NONE,
     RD                  => (others => '0'),
     RS1                 => (others => '0'),
     RS2                 => (others => '0'),
     DS1                 => (others => '0'),
     DS2                 => (others => '0'),
     Immediate           => (others => '0'),
-    IsFaulted           => '0',
-    BranchMode          => 0,
+    Break           => '0',
     IsBranch            => '0',
-    IsStride4            => '0',
+    IsStride4           => '0',
     IsSignExtend        => '0',
     IPToALU             => '0',
     Data                => (others => '0')
@@ -193,15 +195,15 @@ constant MEM_NOP : MEM_record_t := (
 type WB_record_t is record
     Result      : std_logic_vector(31 downto 0); -- MEMWB ALU result delayed
     Data        : std_logic_vector(31 downto 0); -- MEMWB MemData delayed
-    Forward     : natural;                       -- ForwardedMemData delayed
-    MemoryWidth : natural;
+    Forward     : forwarding_path_t;             -- ForwardedMemData delayed
+    MemoryWidth : data_width_t;
 end record WB_record_t;
 
 constant WB_NOP : WB_record_t := (
     Result       => (others => '0'),
     Data         => (others => '0'),
-    Forward      => 0,
-    MemoryWidth  => 0
+    Forward      => FORWARDING_NONE,
+    MemoryWidth  => BYTE_TYPE
 );
 
 ------------------------------------------------------
