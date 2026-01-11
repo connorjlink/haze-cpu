@@ -32,7 +32,7 @@ begin
         -- insert a NOP
         elsif rising_edge(i_Clock) then
             if i_Flush = '1' then
-                o_Signals <= NOP;    
+                o_Signals <= NOP;
             
         -- register contents
         elsif i_Stall = '0' then

@@ -1,0 +1,26 @@
+../../src/ieee2008/numeric_std-body.vhdl:3036:7:@0ms:(assertion warning): NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+../../src/ieee2008/numeric_std-body.vhdl:3036:7:@0ms:(assertion warning): NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+../../src/ieee2008/numeric_std-body.vhdl:3036:7:@0ms:(assertion warning): NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+../../src/ieee2008/numeric_std-body.vhdl:3036:7:@0ms:(assertion warning): NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+../../src/ieee2008/numeric_std-body.vhdl:1320:7:@0ms:(assertion warning): NUMERIC_STD."<": metavalue detected, returning FALSE
+../../src/ieee2008/numeric_std-body.vhdl:1347:7:@0ms:(assertion warning): NUMERIC_STD."<": metavalue detected, returning FALSE
+../../src/ieee2008/numeric_std-body.vhdl:1347:7:@0ms:(assertion warning): NUMERIC_STD."<": metavalue detected, returning FALSE
+../../src/ieee2008/numeric_std-body.vhdl:1320:7:@0ms:(assertion warning): NUMERIC_STD."<": metavalue detected, returning FALSE
+../../src/ieee2008/numeric_std-body.vhdl:3036:7:@0ms:(assertion warning): NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+../../src/ieee2008/numeric_std-body.vhdl:3036:7:@0ms:(assertion warning): NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+../../src/ieee2008/numeric_std-body.vhdl:1347:7:@0ms:(assertion warning): NUMERIC_STD."<": metavalue detected, returning FALSE
+../../src/ieee2008/numeric_std-body.vhdl:1320:7:@0ms:(assertion warning): NUMERIC_STD."<": metavalue detected, returning FALSE
+../../src/ieee2008/numeric_std-body.vhdl:3036:7:@15ns:(assertion warning): NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+../../src/ieee2008/numeric_std-body.vhdl:3036:7:@15ns:(assertion warning): NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+./test/tb_processor.vhd:275:17:@40760ns:(report note): Simulation running... (cycle count: 1000)
+./test/tb_processor.vhd:275:17:@60760ns:(report note): Simulation running... (cycle count: 2000)
+./test/tb_processor.vhd:275:17:@80760ns:(report note): Simulation running... (cycle count: 3000)
+./test/tb_processor.vhd:275:17:@100760ns:(report note): Simulation running... (cycle count: 4000)
+./test/tb_processor.vhd:275:17:@120760ns:(report note): Simulation running... (cycle count: 5000)
+./test/tb_processor.vhd:275:17:@140760ns:(report note): Simulation running... (cycle count: 6000)
+./test/tb_processor.vhd:275:17:@160760ns:(report note): Simulation running... (cycle count: 7000)
+./test/tb_processor.vhd:275:17:@180760ns:(report note): Simulation running... (cycle count: 8000)
+./test/tb_processor.vhd:275:17:@200760ns:(report note): Simulation running... (cycle count: 9000)
+../../src/ieee2008/numeric_std-body.vhdl:3036:7:@205200ns:(assertion warning): NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+../../src/ieee2008/numeric_std-body.vhdl:3036:7:@205200ns:(assertion warning): NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+simulation finished @205260ns

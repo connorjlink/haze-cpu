@@ -117,6 +117,8 @@ clean:
 	$(call RM,binary/*_d.hex)
 	$(call RM,binary/*.o)
 	$(call RM,trace/*.trace)
+	$(call RM,trace/*.log)
+	$(call RM,trace/*.vcd)
 	$(call RM,work-obj08.cf)
 
 $(WORK_CF): $(SOURCE)
@@ -136,7 +138,7 @@ $(TRACE_DIR):
 	mkdir $(TRACE_DIR)
 
 $(TRACE_DIR)/%.rars.trace: $(ASSEMBLY_DIR)/%.s | $(TRACE_DIR)
-	@$(PYTHON) tools/rars_sim.py --jar "$(RARS_JAR)" --asm "$<" --trace "$@" --timeout "$(SIM_TIMEOUT)"
+	@$(PYTHON) tools/simulator.py --jar "$(RARS_JAR)" --asm "$<" --trace "$@" --timeout "$(SIM_TIMEOUT)"
 
 $(TRACE_DIR)/%.ghdl.trace: $(ASSEMBLY_DIR)/%.s $(GHDL_TB_VHD) $(WORK_CF) $(BINARY_DIR)/%_i.hex $(BINARY_DIR)/%_d.hex | $(TRACE_DIR)
 	@$(call TOUCH,$@)
@@ -145,7 +147,6 @@ $(TRACE_DIR)/%.ghdl.trace: $(ASSEMBLY_DIR)/%.s $(GHDL_TB_VHD) $(WORK_CF) $(BINAR
 		-gBINARY_DIRECTORY="$(TB_BINARY_DIR)" \
 		-gTRACE_DIRECTORY="$(TB_TRACE_DIR)" \
 		-gTEST_FILE="$*" \
-		--vcd="$(TRACE_DIR)/$*.ghdl.vcd" \
 		$(GHDL_GENERIC_ARGS) \
 		> "$(TRACE_DIR)/$*.ghdl.log" 2>&1
 
@@ -153,7 +154,7 @@ simulate:
 	$(if $(strip $(ASM)),,$(error Usage: make simulate ASM=$(ASSEMBLY_DIR)/file.s [RARS_JAR=...] [SIM_TIMEOUT=...] [MAX_MISMATCHES=...] [GHDL_GENERIC_ARGS=...]))
 	@$(MAKE) setup
 	@$(MAKE) "$(BINARY_DIR)/$(basename $(notdir $(ASM)))_i.hex" "$(BINARY_DIR)/$(basename $(notdir $(ASM)))_d.hex"
-	@-$(MAKE) "$(TRACE_DIR)/$(basename $(notdir $(ASM))).ghdl.trace"
+	@$(MAKE) "$(TRACE_DIR)/$(basename $(notdir $(ASM))).ghdl.trace"
 	@$(PYTHON) tools/simulator.py \
 		--jar "$(RARS_JAR)" \
 		--asm "$(ASM)" \
@@ -163,8 +164,18 @@ simulate:
 		--max-mismatches "$(MAX_MISMATCHES)" \
 		--summary
 
-simulate_all: $(RARS_TRACEFILES) $(GHDL_TRACEFILES)
-	@:
+ghdl:
+	$(if $(strip $(ASM)),,$(error Usage: make ghdl ASM=$(ASSEMBLY_DIR)/file.s [RARS_JAR=...] [SIM_TIMEOUT=...] [GHDL_GENERIC_ARGS=...]))
+	@$(MAKE) setup
+	@$(MAKE) "$(BINARY_DIR)/$(basename $(notdir $(ASM)))_i.hex" "$(BINARY_DIR)/$(basename $(notdir $(ASM)))_d.hex"
+	@$(MAKE) $(TRACE_DIR)
+	@$(ANALYZE) $(GHDL_TB_VHD)
+	@$(RUN) $(GHDL_TB) \
+		-gBINARY_DIRECTORY="$(TB_BINARY_DIR)" \
+		-gTRACE_DIRECTORY="$(TB_TRACE_DIR)" \
+		-gTEST_FILE="$(basename $(notdir $(ASM)))" \
+		$(GHDL_GENERIC_ARGS)
+	@$(call CAT,$(TRACE_DIR)/$(basename $(notdir $(ASM))).ghdl.log)
 
 tests: test_barrel_shifter test_adder_1 test_adder_N test_addersubtractor_N test_arithmetic_logic_unit test_branch_unit test_not_N test_decoder_5to32 test_instruction_decoder test_register_1 test_register_N test_memory test_extender test_instruction_pointer test_multiplexer_32to1 test_multiplexer_2to1_N test_multiplexer_2to1 test_multiplier test_register_file test_control_unit test_processor
 
@@ -253,3 +264,14 @@ test_control_unit: setup ./test/tb_control_unit.vhd
 test_processor: setup ./test/tb_processor.vhd
 	$(ANALYZE) ./test/tb_processor.vhd
 	$(RUN) tb_processor
+
+simulate_all:
+	make simulate ASM=$(ASSEMBLY_DIR)/addi.s
+	make simulate ASM=$(ASSEMBLY_DIR)/base.s
+	make simulate ASM=$(ASSEMBLY_DIR)/best_hardware_scheduled.s
+	make simulate ASM=$(ASSEMBLY_DIR)/best_single_cycle.s
+	make simulate ASM=$(ASSEMBLY_DIR)/bubblesort.s
+	make simulate ASM=$(ASSEMBLY_DIR)/control_flow.s
+	make simulate ASM=$(ASSEMBLY_DIR)/fibonacci.s
+	make simulate ASM=$(ASSEMBLY_DIR)/good_single_cycle.s
+	make simulate ASM=$(ASSEMBLY_DIR)/ok_single_cycle.s

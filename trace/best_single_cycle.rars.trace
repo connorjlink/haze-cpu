@@ -1,0 +1,400 @@
+Memory Write to Addr: 0x10010000 Val: 0x10010000
+Memory Write to Addr: 0x10010004 Val: 0x10010004
+Memory Write to Addr: 0x10010008 Val: 0x10010008
+Memory Write to Addr: 0x1001000C Val: 0x1001000C
+Memory Write to Addr: 0x10010010 Val: 0x10010010
+Memory Write to Addr: 0x10010014 Val: 0x10010014
+Memory Write to Addr: 0x10010018 Val: 0x10010018
+Memory Write to Addr: 0x1001001C Val: 0x1001001C
+Memory Write to Addr: 0x10010020 Val: 0x10010020
+Memory Write to Addr: 0x10010024 Val: 0x10010024
+Memory Write to Addr: 0x10010028 Val: 0x10010028
+Memory Write to Addr: 0x1001002C Val: 0x1001002C
+Memory Write to Addr: 0x10010030 Val: 0x10010030
+Memory Write to Addr: 0x10010034 Val: 0x10010034
+Memory Write to Addr: 0x10010038 Val: 0x10010038
+Memory Write to Addr: 0x1001003C Val: 0x1001003C
+Memory Write to Addr: 0x10010040 Val: 0x10010040
+Memory Write to Addr: 0x10010044 Val: 0x10010044
+Memory Write to Addr: 0x10010048 Val: 0x10010048
+Memory Write to Addr: 0x1001004C Val: 0x1001004C
+Memory Write to Addr: 0x10010050 Val: 0x10010050
+Memory Write to Addr: 0x10010054 Val: 0x10010054
+Memory Write to Addr: 0x10010058 Val: 0x10010058
+Memory Write to Addr: 0x1001005C Val: 0x1001005C
+Memory Write to Addr: 0x10010060 Val: 0x10010060
+Memory Write to Addr: 0x10010064 Val: 0x10010064
+Memory Write to Addr: 0x10010068 Val: 0x10010068
+Memory Write to Addr: 0x1001006C Val: 0x1001006C
+Memory Write to Addr: 0x10010070 Val: 0x10010070
+Memory Write to Addr: 0x10010074 Val: 0x10010074
+Memory Write to Addr: 0x10010078 Val: 0x10010078
+Memory Write to Addr: 0x1001007C Val: 0x1001007C
+Memory Write to Addr: 0x10010080 Val: 0x10010080
+Memory Write to Addr: 0x10010084 Val: 0x10010084
+Memory Write to Addr: 0x10010088 Val: 0x10010088
+Memory Write to Addr: 0x1001008C Val: 0x1001008C
+Memory Write to Addr: 0x10010090 Val: 0x10010090
+Memory Write to Addr: 0x10010094 Val: 0x10010094
+Memory Write to Addr: 0x10010098 Val: 0x10010098
+Memory Write to Addr: 0x1001009C Val: 0x1001009C
+Memory Write to Addr: 0x100100A0 Val: 0x100100A0
+Memory Write to Addr: 0x100100A4 Val: 0x100100A4
+Memory Write to Addr: 0x100100A8 Val: 0x100100A8
+Memory Write to Addr: 0x100100AC Val: 0x100100AC
+Memory Write to Addr: 0x100100B0 Val: 0x100100B0
+Memory Write to Addr: 0x100100B4 Val: 0x100100B4
+Memory Write to Addr: 0x100100B8 Val: 0x100100B8
+Memory Write to Addr: 0x100100BC Val: 0x100100BC
+Memory Write to Addr: 0x100100C0 Val: 0x100100C0
+Memory Write to Addr: 0x100100C4 Val: 0x100100C4
+Memory Write to Addr: 0x100100C8 Val: 0x100100C8
+Memory Write to Addr: 0x100100CC Val: 0x100100CC
+Memory Write to Addr: 0x100100D0 Val: 0x100100D0
+Memory Write to Addr: 0x100100D4 Val: 0x100100D4
+Memory Write to Addr: 0x100100D8 Val: 0x100100D8
+Memory Write to Addr: 0x100100DC Val: 0x100100DC
+Memory Write to Addr: 0x100100E0 Val: 0x100100E0
+Memory Write to Addr: 0x100100E4 Val: 0x100100E4
+Memory Write to Addr: 0x100100E8 Val: 0x100100E8
+Memory Write to Addr: 0x100100EC Val: 0x100100EC
+Memory Write to Addr: 0x100100F0 Val: 0x100100F0
+Memory Write to Addr: 0x100100F4 Val: 0x100100F4
+Memory Write to Addr: 0x100100F8 Val: 0x100100F8
+Memory Write to Addr: 0x100100FC Val: 0x100100FC
+Memory Write to Addr: 0x10010100 Val: 0x10010100
+[inst #1] addi x5,x0,256
+Register Write to Reg: 0x05 Val: 0x00000100
+[inst #2] auipc x6,64528
+Register Write to Reg: 0x06 Val: 0x10010004
+[inst #3] addi x6,x6,-4
+Register Write to Reg: 0x06 Val: 0x10010000
+[inst #4] auipc x7,64528
+Register Write to Reg: 0x07 Val: 0x1001000C
+[inst #5] addi x7,x7,-12
+Register Write to Reg: 0x07 Val: 0x10010000
+[inst #6] add x7,x7,x5
+Register Write to Reg: 0x07 Val: 0x10010100
+[inst #7] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010004
+[inst #8] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010004
+[inst #9] blt x6,x7,-8
+[inst #10] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010008
+[inst #11] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010008
+[inst #12] blt x6,x7,-8
+[inst #13] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x1001000C
+[inst #14] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x1001000C
+[inst #15] blt x6,x7,-8
+[inst #16] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010010
+[inst #17] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010010
+[inst #18] blt x6,x7,-8
+[inst #19] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010014
+[inst #20] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010014
+[inst #21] blt x6,x7,-8
+[inst #22] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010018
+[inst #23] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010018
+[inst #24] blt x6,x7,-8
+[inst #25] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x1001001C
+[inst #26] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x1001001C
+[inst #27] blt x6,x7,-8
+[inst #28] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010020
+[inst #29] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010020
+[inst #30] blt x6,x7,-8
+[inst #31] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010024
+[inst #32] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010024
+[inst #33] blt x6,x7,-8
+[inst #34] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010028
+[inst #35] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010028
+[inst #36] blt x6,x7,-8
+[inst #37] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x1001002C
+[inst #38] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x1001002C
+[inst #39] blt x6,x7,-8
+[inst #40] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010030
+[inst #41] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010030
+[inst #42] blt x6,x7,-8
+[inst #43] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010034
+[inst #44] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010034
+[inst #45] blt x6,x7,-8
+[inst #46] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010038
+[inst #47] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010038
+[inst #48] blt x6,x7,-8
+[inst #49] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x1001003C
+[inst #50] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x1001003C
+[inst #51] blt x6,x7,-8
+[inst #52] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010040
+[inst #53] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010040
+[inst #54] blt x6,x7,-8
+[inst #55] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010044
+[inst #56] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010044
+[inst #57] blt x6,x7,-8
+[inst #58] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010048
+[inst #59] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010048
+[inst #60] blt x6,x7,-8
+[inst #61] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x1001004C
+[inst #62] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x1001004C
+[inst #63] blt x6,x7,-8
+[inst #64] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010050
+[inst #65] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010050
+[inst #66] blt x6,x7,-8
+[inst #67] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010054
+[inst #68] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010054
+[inst #69] blt x6,x7,-8
+[inst #70] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010058
+[inst #71] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010058
+[inst #72] blt x6,x7,-8
+[inst #73] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x1001005C
+[inst #74] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x1001005C
+[inst #75] blt x6,x7,-8
+[inst #76] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010060
+[inst #77] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010060
+[inst #78] blt x6,x7,-8
+[inst #79] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010064
+[inst #80] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010064
+[inst #81] blt x6,x7,-8
+[inst #82] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010068
+[inst #83] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010068
+[inst #84] blt x6,x7,-8
+[inst #85] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x1001006C
+[inst #86] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x1001006C
+[inst #87] blt x6,x7,-8
+[inst #88] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010070
+[inst #89] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010070
+[inst #90] blt x6,x7,-8
+[inst #91] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010074
+[inst #92] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010074
+[inst #93] blt x6,x7,-8
+[inst #94] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010078
+[inst #95] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010078
+[inst #96] blt x6,x7,-8
+[inst #97] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x1001007C
+[inst #98] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x1001007C
+[inst #99] blt x6,x7,-8
+[inst #100] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010080
+[inst #101] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010080
+[inst #102] blt x6,x7,-8
+[inst #103] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010084
+[inst #104] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010084
+[inst #105] blt x6,x7,-8
+[inst #106] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010088
+[inst #107] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010088
+[inst #108] blt x6,x7,-8
+[inst #109] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x1001008C
+[inst #110] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x1001008C
+[inst #111] blt x6,x7,-8
+[inst #112] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010090
+[inst #113] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010090
+[inst #114] blt x6,x7,-8
+[inst #115] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010094
+[inst #116] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010094
+[inst #117] blt x6,x7,-8
+[inst #118] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010098
+[inst #119] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010098
+[inst #120] blt x6,x7,-8
+[inst #121] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x1001009C
+[inst #122] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x1001009C
+[inst #123] blt x6,x7,-8
+[inst #124] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100A0
+[inst #125] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100A0
+[inst #126] blt x6,x7,-8
+[inst #127] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100A4
+[inst #128] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100A4
+[inst #129] blt x6,x7,-8
+[inst #130] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100A8
+[inst #131] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100A8
+[inst #132] blt x6,x7,-8
+[inst #133] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100AC
+[inst #134] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100AC
+[inst #135] blt x6,x7,-8
+[inst #136] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100B0
+[inst #137] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100B0
+[inst #138] blt x6,x7,-8
+[inst #139] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100B4
+[inst #140] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100B4
+[inst #141] blt x6,x7,-8
+[inst #142] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100B8
+[inst #143] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100B8
+[inst #144] blt x6,x7,-8
+[inst #145] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100BC
+[inst #146] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100BC
+[inst #147] blt x6,x7,-8
+[inst #148] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100C0
+[inst #149] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100C0
+[inst #150] blt x6,x7,-8
+[inst #151] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100C4
+[inst #152] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100C4
+[inst #153] blt x6,x7,-8
+[inst #154] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100C8
+[inst #155] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100C8
+[inst #156] blt x6,x7,-8
+[inst #157] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100CC
+[inst #158] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100CC
+[inst #159] blt x6,x7,-8
+[inst #160] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100D0
+[inst #161] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100D0
+[inst #162] blt x6,x7,-8
+[inst #163] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100D4
+[inst #164] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100D4
+[inst #165] blt x6,x7,-8
+[inst #166] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100D8
+[inst #167] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100D8
+[inst #168] blt x6,x7,-8
+[inst #169] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100DC
+[inst #170] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100DC
+[inst #171] blt x6,x7,-8
+[inst #172] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100E0
+[inst #173] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100E0
+[inst #174] blt x6,x7,-8
+[inst #175] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100E4
+[inst #176] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100E4
+[inst #177] blt x6,x7,-8
+[inst #178] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100E8
+[inst #179] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100E8
+[inst #180] blt x6,x7,-8
+[inst #181] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100EC
+[inst #182] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100EC
+[inst #183] blt x6,x7,-8
+[inst #184] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100F0
+[inst #185] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100F0
+[inst #186] blt x6,x7,-8
+[inst #187] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100F4
+[inst #188] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100F4
+[inst #189] blt x6,x7,-8
+[inst #190] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100F8
+[inst #191] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100F8
+[inst #192] blt x6,x7,-8
+[inst #193] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x100100FC
+[inst #194] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x100100FC
+[inst #195] blt x6,x7,-8
+[inst #196] addi x6,x6,4
+Register Write to Reg: 0x06 Val: 0x10010100
+[inst #197] lw x6,0(x6)
+Register Write to Reg: 0x06 Val: 0x10010100
+[inst #198] blt x6,x7,-8
+[inst #199] ebreak 
+
+Program terminated by dropping off the bottom.

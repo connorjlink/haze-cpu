@@ -22,12 +22,12 @@ entity forwarding_unit is
         i_EXMEM_RS1                 : in  std_logic_vector(4 downto 0);
         i_EXMEM_RS2                 : in  std_logic_vector(4 downto 0);
         i_EXMEM_RD                  : in  std_logic_vector(4 downto 0);
-        i_EXMEM_RegisterWriteEnable : in  std_logic;
+        i_EXMEM_RegisterFileWriteEnable : in  std_logic;
         i_EXMEM_MemoryWriteEnable   : in  std_logic;
         i_EXMEM_IsLoad              : in  std_logic;
 
         i_MEMWB_RD                  : in  std_logic_vector(4 downto 0);
-        i_MEMWB_RegisterWriteEnable : in  std_logic;
+        i_MEMWB_RegisterFileWriteEnable : in  std_logic;
         i_MEMWB_MemoryWriteEnable   : in  std_logic;
         i_MEMWB_IsLoad              : in  std_logic;
 
@@ -69,31 +69,31 @@ begin
         if i_BranchMode = BRANCHMODE_NONE then
 
             -- Detect ALU operand dependence upon arithmetic result
-            if i_EXMEM_RegisterWriteEnable = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS1 then
+            if i_EXMEM_RegisterFileWriteEnable = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS1 then
                 v_ForwardALUOperand1 := FORWARDING_FROMEX;
             
             -- Detect ALU operand dependence upon memory access or MEM-stage operand
-            elsif i_MEMWB_RegisterWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS1 and not 
-                 (i_EXMEM_RegisterWriteEnable = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS1) then
+            elsif i_MEMWB_RegisterFileWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS1 and not 
+                 (i_EXMEM_RegisterFileWriteEnable = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS1) then
                 v_ForwardALUOperand1 := FORWARDING_FROMMEM;
 
             end if;
 
             
             -- Detect ALU operand dependence upon arithmetic result
-            if i_EXMEM_RegisterWriteEnable = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS2 and i_IDEX_ALUSource = ALUSOURCE_REGISTER then
+            if i_EXMEM_RegisterFileWriteEnable = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS2 and i_IDEX_ALUSource = ALUSOURCE_REGISTER then
                 v_ForwardALUOperand2 := FORWARDING_FROMEX;
 
             -- Detect ALU operand dependence upon memory access or MEM-stage operand
-            elsif i_MEMWB_RegisterWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS2 and not
-                 (i_EXMEM_RegisterWriteEnable = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS2) and i_EXMEM_IsLoad = '0' and i_IDEX_IsLoad = '0' and i_IDEX_ALUSource = ALUSOURCE_REGISTER then
+            elsif i_MEMWB_RegisterFileWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS2 and not
+                 (i_EXMEM_RegisterFileWriteEnable = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS2) and i_EXMEM_IsLoad = '0' and i_IDEX_IsLoad = '0' and i_IDEX_ALUSource = ALUSOURCE_REGISTER then
                 v_ForwardALUOperand2 := FORWARDING_FROMMEM;
 
             end if;
 
 
             -- Detect memory address or write data dependency upon spaced-out instruction
-            if i_MEMWB_RegisterWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS2 then
+            if i_MEMWB_RegisterFileWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS2 then
                 -- When the earlier instruction loads data needed later for store
                 if i_MEMWB_IsLoad = '1' and i_IDEX_MemoryWriteEnable = '1' then
                     v_ForwardMemData := FORWARDING_FROMMEM;
@@ -105,22 +105,22 @@ begin
                 end if;
                 
             -- Detect memory write data dependence upon arithmetic result
-            elsif i_EXMEM_RegisterWriteEnable = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS2 and i_IDEX_IsLoad = '1' and i_EXMEM_IsLoad = '0' then
+            elsif i_EXMEM_RegisterFileWriteEnable = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS2 and i_IDEX_IsLoad = '1' and i_EXMEM_IsLoad = '0' then
                 v_ForwardMemData := FORWARDING_FROMEXMEM_ALU;
 
             -- Detect memory write data dependence upon retiring memory read
-            elsif i_MEMWB_RegisterWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS2 and i_MEMWB_IsLoad = '1' then
+            elsif i_MEMWB_RegisterFileWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS2 and i_MEMWB_IsLoad = '1' then
                 v_ForwardMemData := FORWARDING_FROMMEM;
             
             -- Detect memory write data dependence upon retiring arithmetic result
-            elsif i_MEMWB_RegisterWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS2 and i_IDEX_IsLoad = '1' and i_MEMWB_IsLoad = '0' then
+            elsif i_MEMWB_RegisterFileWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS2 and i_IDEX_IsLoad = '1' and i_MEMWB_IsLoad = '0' then
                 v_ForwardMemData := FORWARDING_FROMMEMWB_ALU;
 
             end if;
 
 
             -- Detect address computation dependence upon arithmetic result
-            if i_MEMWB_RegisterWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS1 then
+            if i_MEMWB_RegisterFileWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS1 then
                 -- When the earlier instruction is load/store
                 if i_IDEX_IsLoad = '0' and i_MEMWB_IsLoad = '1' then
                     v_ForwardALUOperand1 := FORWARDING_FROMMEM;
@@ -136,7 +136,7 @@ begin
                 end if;
 
             -- Detect address computation dependence upon retiring arithmetic result
-            elsif i_MEMWB_RegisterWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS1 and i_IDEX_IsLoad = '1' then
+            elsif i_MEMWB_RegisterFileWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS1 and i_IDEX_IsLoad = '1' then
                 v_ForwardALUOperand2 := FORWARDING_FROMMEMWB_ALU;
 
             end if;
@@ -150,10 +150,10 @@ begin
             -- NOTE: the following two `if` statements are mirrored for each corresponding operand register
 
             -- Detect branch comparison operator dependence upon arithmetic result
-            if i_EXMEM_RegisterWriteEnable = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS1 then
+            if i_EXMEM_RegisterFileWriteEnable = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS1 then
                 v_ForwardBGUOperand1 := FORWARDING_FROMEXMEM_ALU;
 
-            elsif i_MEMWB_RegisterWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS1 then
+            elsif i_MEMWB_RegisterFileWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS1 then
                 
                 -- Detect branch comparison operator dependence upon memory access
                 if i_MEMWB_IsLoad = '1' then
@@ -169,10 +169,10 @@ begin
 
 
             -- Detect branch comparison operator dependence upon arithmetic result
-            if i_EXMEM_RegisterWriteEnable = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS2 then
+            if i_EXMEM_RegisterFileWriteEnable = '1' and i_EXMEM_RD /= 5x"0" and i_EXMEM_RD = i_IDEX_RS2 then
                 v_ForwardBGUOperand2 := FORWARDING_FROMEXMEM_ALU;
 
-            elsif i_MEMWB_RegisterWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS2 then
+            elsif i_MEMWB_RegisterFileWriteEnable = '1' and i_MEMWB_RD /= 5x"0" and i_MEMWB_RD = i_IDEX_RS2 then
                 
                 -- Detect branch comparison operator dependence upon memory access
                 if i_MEMWB_IsLoad = '1' then

@@ -56,6 +56,7 @@ signal s_BranchOperand1 : std_logic_vector(31 downto 0);
 signal s_BranchOperand2 : std_logic_vector(31 downto 0);
 signal s_BranchTaken    : std_logic;
 signal s_BranchNotTaken : std_logic;
+signal s_BranchLoad     : std_logic := '0';
 
 -- Signal to hold the modified clock
 signal n_Clock  : std_logic;
@@ -381,6 +382,11 @@ begin
                        std_logic_vector(signed(IDEX_ID_buf.DS1)                + signed(IDEX_ID_buf.Immediate)) when (IDEX_ID_buf.BranchMode = BRANCHMODE_JALR) else 
                        (others => '0');
 
+    s_BranchLoad <=
+        '1' when (IDEX_ID_buf.BranchMode = BRANCHMODE_JALR) else
+        '1' when (IDEX_ID_buf.BranchMode = BRANCHMODE_JAL_OR_BCC and IDEX_ID_buf.IsBranch = '0') else
+        (s_BranchTaken and IDEX_ID_buf.IsBranch);
+
     InstructionPointer: entity work.instruction_pointer
         generic map(
             ResetAddress => 32x"00400000"
@@ -388,8 +394,8 @@ begin
         port map(
             i_Clock       => i_Clock,
             i_Reset       => i_Reset,
-            i_Stall       => s_IPBreak,
-            i_Load        => s_BranchTaken,
+            i_Stall       => s_IPBreak or s_BranchLoad,
+            i_Load        => s_BranchLoad,
             i_LoadAddress => s_BranchAddress,
             i_Stride      => '1', -- IDEX_ID_buf.IsStride4, -- NOTE: This might be 1 pipeline stage too late to increment the correct corresponding amount. But, resolving this requires instruction pre-decoding to compute length, so just assume 4-byte instructions for now
             o_Address     => s_IPAddress,
@@ -444,7 +450,7 @@ begin
             i_Reset               => i_Reset,
             i_Instruction         => IDEX_IF_raw.Instruction,
             o_MemoryWriteEnable   => IDEX_ID_raw.MemoryWriteEnable,
-            o_RegisterWriteEnable => IDEX_ID_raw.RegisterWriteEnable,
+            o_RegisterFileWriteEnable => IDEX_ID_raw.RegisterFileWriteEnable,
             o_RegisterSource      => IDEX_ID_raw.RegisterSource,
             o_ALUSource           => IDEX_ID_raw.ALUSource,
             o_ALUOperator         => IDEX_ID_raw.ALUOperator,
@@ -481,7 +487,7 @@ begin
             (others => '0')          when others;
 
 
-    s_RegisterFileWriteEnable <= MEMWB_ID_buf.RegisterWriteEnable;
+    s_RegisterFileWriteEnable <= MEMWB_ID_buf.RegisterFileWriteEnable;
     s_RegisterFileSelect <= MEMWB_ID_buf.RD;
 
     RegisterFile: entity work.register_file
@@ -613,7 +619,7 @@ begin
             i_EXMEM_RS2                 => EXMEM_ID_buf.RS2,
             i_EXMEM_RD                  => EXMEM_ID_buf.RD,
             i_EXMEM_IsLoad              => s_EXMEM_IsLoad,
-            i_EXMEM_RegisterWriteEnable => EXMEM_ID_buf.RegisterWriteEnable,
+            i_EXMEM_RegisterFileWriteEnable => EXMEM_ID_buf.RegisterFileWriteEnable,
 
             i_MEMWB_RD       => MEMWB_ID_buf.RD,
             i_MEMWB_IsLoad   => s_MEMWB_IsLoad,
@@ -648,12 +654,12 @@ begin
             i_EXMEM_RS1                 => EXMEM_ID_buf.RS1,
             i_EXMEM_RS2                 => EXMEM_ID_buf.RS2,
             i_EXMEM_RD                  => EXMEM_ID_buf.RD,
-            i_EXMEM_RegisterWriteEnable => EXMEM_ID_buf.RegisterWriteEnable,
+            i_EXMEM_RegisterFileWriteEnable => EXMEM_ID_buf.RegisterFileWriteEnable,
             i_EXMEM_MemoryWriteEnable   => EXMEM_ID_buf.MemoryWriteEnable,
             i_EXMEM_IsLoad              => s_EXMEM_IsLoad,
 
             i_MEMWB_RD                  => MEMWB_ID_buf.RD,
-            i_MEMWB_RegisterWriteEnable => MEMWB_ID_buf.RegisterWriteEnable,
+            i_MEMWB_RegisterFileWriteEnable => MEMWB_ID_buf.RegisterFileWriteEnable,
             i_MEMWB_MemoryWriteEnable   => MEMWB_ID_buf.MemoryWriteEnable,
             i_MEMWB_IsLoad              => s_MEMWB_IsLoad,
 

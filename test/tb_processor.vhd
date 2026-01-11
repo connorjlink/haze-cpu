@@ -163,16 +163,6 @@ begin
         wait for CLOCK_HALF_PERIOD;
     end process;
 
-    p_Reset: process
-    begin
-        s_Reset <= '0';
-        wait for CLOCK_HALF_PERIOD / 2;
-        s_Reset <= '1';
-        wait for CLOCK_PERIOD;
-        s_Reset <= '0';
-        wait;
-    end process;
-
     p_Trace: process
         file f_Trace      : text open write_mode is TRACE_FILE;
         variable v_Line   : line;
@@ -195,41 +185,42 @@ begin
         loop
             wait until rising_edge(s_Clock);
 
-            if (s_Reset = '0') and (s_TraceEnable = '1') then
-                write(v_Line, string'("Instruction Pointer: 0x"));
-                hwrite(v_Line, a_InstructionPointer);
-                writeline(f_Trace, v_Line);
+            if s_Reset = '0' then
 
-                if (a_RegisterFileWriteEnable = '1') then
-                    write(v_Line, string'("In clock cycle: "));
-                    write(v_Line, v_Cycles);
-                    writeline(f_Trace, v_Line);
-
-                    write(v_Line, string'("Register Write to Reg: 0x"));
-                    hwrite(v_Line, a_RegisterFileSelect);
-                    write(v_Line, string'(" Val: 0x"));
-                    hwrite(v_Line, a_RegisterFileData);
-                    writeline(f_Trace, v_Line);
-                end if;
-
-                if (a_DataMemoryWriteEnable = '1') then
-                    write(v_Line, string'("In clock cycle: "));
-                    write(v_Line, v_Cycles);
-                    writeline(f_Trace, v_Line);
-
-                    write(v_Line, string'("Memory Write to Addr: 0x"));
-                    hwrite(v_Line, a_DataMemoryAddress);
-                    write(v_Line, string'(" Val: 0x"));
-                    hwrite(v_Line, a_DataMemoryData);
-                    writeline(f_Trace, v_Line);
-                end if;
-
-                if (s_oHalt = '1') then
+                if s_oHalt = '1' then
                     write(v_Line, string'("Execution stopped at cycle "));
                     write(v_Line, v_Cycles);
                     writeline(f_Trace, v_Line);
                     file_close(f_Trace);
                     finish;
+                end if;
+
+                if s_TraceEnable = '1' then
+
+                    if (a_RegisterFileWriteEnable = '1') then
+                        write(v_Line, string'("In clock cycle: "));
+                        write(v_Line, v_Cycles);
+                        writeline(f_Trace, v_Line);
+
+                        write(v_Line, string'("Register Write to Reg: 0x"));
+                        hwrite(v_Line, a_RegisterFileSelect);
+                        write(v_Line, string'(" Val: 0x"));
+                        hwrite(v_Line, a_RegisterFileData);
+                        writeline(f_Trace, v_Line);
+                    end if;
+
+                    if (a_DataMemoryWriteEnable = '1') then
+                        write(v_Line, string'("In clock cycle: "));
+                        write(v_Line, v_Cycles);
+                        writeline(f_Trace, v_Line);
+
+                        write(v_Line, string'("Memory Write to Addr: 0x"));
+                        hwrite(v_Line, a_DataMemoryAddress);
+                        write(v_Line, string'(" Val: 0x"));
+                        hwrite(v_Line, a_DataMemoryData);
+                        writeline(f_Trace, v_Line);
+                    end if;
+
                 end if;
 
                 v_Cycles := v_Cycles + 1;
@@ -241,12 +232,15 @@ begin
     end process;
 
     p_Stimulus: process
-        constant c_MaximumCycles : integer := 5000;
+        constant c_MaximumCycles : integer := 20000;
         variable v_Cycles        : integer := 0;
     begin
         -- Await reset and stabilization; trigger off-edge
         wait for CLOCK_HALF_PERIOD;
         wait for CLOCK_HALF_PERIOD / 2;
+
+        s_TraceEnable <= '0';
+        s_Reset       <= '1';
 
         -- Load processor instruction and data memories with target program
         LoadInstructionMemory(
@@ -254,7 +248,7 @@ begin
             s_iInstructionLoad,
             s_iInstructionAddress,
             s_iInstructionExternal,
-            INSTRUCTION_FILE ,
+            INSTRUCTION_FILE,
             x"00400000"
         );
 
@@ -263,13 +257,15 @@ begin
             s_iDataLoad,
             s_iDataAddress,
             s_iDataExternal,
-            DATA_FILE ,
+            DATA_FILE,
             x"10010000"
         );
 
-        s_TraceEnable <= '1';
+        wait until rising_edge(s_Clock);
+        s_Reset <= '0';
 
-        report to_string(s_oHalt) & " - Beginning program execution." severity note;
+        wait until rising_edge(s_Clock);
+        s_TraceEnable <= '1';
 
         while s_oHalt = '0' loop
             wait until rising_edge(s_Clock);
@@ -286,7 +282,7 @@ begin
 
         s_TraceEnable <= '0';
 
-        finish;
+        wait;
 
     end process;
 

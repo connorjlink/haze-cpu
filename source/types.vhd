@@ -109,7 +109,7 @@ constant IF_NOP : IF_record_t := (
 
 type ID_record_t is record
     MemoryWriteEnable   : std_logic;
-    RegisterWriteEnable : std_logic;
+    RegisterFileWriteEnable : std_logic;
     RegisterSource      : rf_source_t;
     ALUSource           : alu_source_t;
     ALUOperator         : alu_operator_t;
@@ -132,7 +132,7 @@ end record ID_record_t;
 
 constant ID_NOP : ID_record_t := (
     MemoryWriteEnable   => '0',
-    RegisterWriteEnable => '0',
+    RegisterFileWriteEnable => '0',
     RegisterSource      => RFSOURCE_FROMALU,
     ALUSource           => ALUSOURCE_IMMEDIATE,
     ALUOperator         => ADD_OPERATOR,

@@ -26,8 +26,8 @@ signal s_Clock, s_Reset : std_logic := '0';
 
 -- Stimulus signals
 signal s_iInstruction         : std_logic_vector(31 downto 0) := 32x"0";
-signal s_oMemoryWriteEnableEnable   : std_logic;
-signal s_oRegisterWriteEnableEnable : std_logic;
+signal s_oMemoryWriteEnable   : std_logic;
+signal s_oRegisterFileWriteEnable : std_logic;
 signal s_oRegisterSource      : rf_source_t;
 signal s_oALUSource           : alu_source_t;
 signal s_oALUOperator         : alu_operator_t;
@@ -52,8 +52,8 @@ begin
             i_Clock               => s_Clock,
             i_Reset               => s_Reset,
             i_Instruction         => s_iInstruction,
-            o_MemoryWriteEnable   => s_oMemoryWriteEnableEnable,
-            o_RegisterWriteEnable => s_oRegisterWriteEnableEnable,
+            o_MemoryWriteEnable   => s_oMemoryWriteEnable,
+            o_RegisterFileWriteEnable => s_oRegisterFileWriteEnable,
             o_RegisterSource      => s_oRegisterSource,
             o_ALUSource           => s_oALUSource,
             o_ALUOperator         => s_oALUOperator,
@@ -101,8 +101,8 @@ begin
         -- addi x25, x0, 0
         s_iInstruction <= 32x"00000c93";
         wait for CLOCK_PERIOD;
-        assert s_oMemoryWriteEnableEnable = '0'
-            and s_oRegisterWriteEnableEnable = '1'
+        assert s_oMemoryWriteEnable = '0'
+            and s_oRegisterFileWriteEnable = '1'
             and s_oRegisterSource = RFSOURCE_FROMALU
             and s_oALUSource = ALUSOURCE_IMMEDIATE
             and s_oALUOperator = ADD_OPERATOR
@@ -124,8 +124,8 @@ begin
         -- addi x26, x0, 256
         s_iInstruction <= 32x"10000d13";
         wait for CLOCK_PERIOD;
-        assert s_oMemoryWriteEnableEnable = '0'
-            and s_oRegisterWriteEnableEnable = '1'
+        assert s_oMemoryWriteEnable = '0'
+            and s_oRegisterFileWriteEnable = '1'
             and s_oRegisterSource = RFSOURCE_FROMALU
             and s_oALUSource = ALUSOURCE_IMMEDIATE
             and s_oALUOperator = ADD_OPERATOR
@@ -147,8 +147,8 @@ begin
         -- lw x1, 0(x25)
         s_iInstruction <= 32x"000ca083";
         wait for CLOCK_PERIOD;
-        assert s_oMemoryWriteEnableEnable = '0'
-            and s_oRegisterWriteEnableEnable = '1'
+        assert s_oMemoryWriteEnable = '0'
+            and s_oRegisterFileWriteEnable = '1'
             and s_oRegisterSource = RFSOURCE_FROMRAM
             and s_oALUSource = ALUSOURCE_IMMEDIATE
             and s_oALUOperator = ADD_OPERATOR
@@ -170,8 +170,8 @@ begin
         -- lw x2, 4(x25)
         s_iInstruction <= 32x"004ca103";
         wait for CLOCK_PERIOD;
-        assert s_oMemoryWriteEnableEnable = '0'
-            and s_oRegisterWriteEnableEnable = '1'
+        assert s_oMemoryWriteEnable = '0'
+            and s_oRegisterFileWriteEnable = '1'
             and s_oRegisterSource = RFSOURCE_FROMRAM
             and s_oALUSource = ALUSOURCE_IMMEDIATE
             and s_oALUOperator = ADD_OPERATOR
@@ -193,8 +193,8 @@ begin
         -- add x1, x1, x2
         s_iInstruction <= 32x"002080b3";
         wait for CLOCK_PERIOD;
-        assert s_oMemoryWriteEnableEnable = '0'
-            and s_oRegisterWriteEnableEnable = '1'
+        assert s_oMemoryWriteEnable = '0'
+            and s_oRegisterFileWriteEnable = '1'
             and s_oRegisterSource = RFSOURCE_FROMALU
             and s_oALUSource = ALUSOURCE_REGISTER
             and s_oALUOperator = ADD_OPERATOR
@@ -215,8 +215,8 @@ begin
         -- sw x1, 0(x26)
         s_iInstruction <= 32x"001d2023";
         wait for CLOCK_PERIOD;
-        assert s_oMemoryWriteEnableEnable = '1'
-            and s_oRegisterWriteEnableEnable = '0'
+        assert s_oMemoryWriteEnable = '1'
+            and s_oRegisterFileWriteEnable = '0'
             -- NOTE: DON'T CARE:and s_oRegisterSource = 
             and s_oALUSource = ALUSOURCE_IMMEDIATE
             and s_oALUOperator = ADD_OPERATOR
@@ -238,8 +238,8 @@ begin
         -- sb x0, 255(x26)
         s_iInstruction <= 32x"0e0d0fa3";
         wait for CLOCK_PERIOD;
-        assert s_oMemoryWriteEnableEnable = '1'
-            and s_oRegisterWriteEnableEnable = '0'
+        assert s_oMemoryWriteEnable = '1'
+            and s_oRegisterFileWriteEnable = '0'
             -- NOTE: DON'T CARE: and s_oRegisterSource = 
             and s_oALUSource = ALUSOURCE_IMMEDIATE
             and s_oALUOperator = ADD_OPERATOR

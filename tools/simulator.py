@@ -343,6 +343,26 @@ def find_rars_errors(output: str) -> list[str]:
             errors.append(error.rstrip())
     return errors
 
+def ghdl_trace_completed(trace_path: Path) -> bool:
+    if not trace_path.is_file():
+        return False
+
+    try:
+        with trace_path.open("rb") as f:
+            try:
+                f.seek(0, 2)
+                size = f.tell()
+                f.seek(max(0, size - 8192), 0)
+            except OSError:
+                pass
+            tail = f.read().decode("utf-8", errors="replace")
+        if GHDL_DONE_RE.search(tail):
+            return True
+
+        text = trace_path.read_text(encoding="utf-8", errors="replace")
+        return GHDL_DONE_RE.search(text) is not None
+    except OSError:
+        return False
 
 def main() -> int:
     p = argparse.ArgumentParser()
@@ -437,6 +457,12 @@ def main() -> int:
     if not ghdl_trace.is_file():
         print(f'Error: GHDL trace not found: "{ghdl_trace}"', file=sys.stderr)
         return 1
+    
+    summary.ghdl_success = ghdl_trace_completed(ghdl_trace)
+    if not summary.ghdl_success:
+        summary.ghdl_errors = [
+            f'Trace did not contain expected stop marker (tb should write "Execution stopped at cycle ..."): {ghdl_trace}'
+        ]
 
     comparison = compare_traces(
         ghdl_trace=str(ghdl_trace),
